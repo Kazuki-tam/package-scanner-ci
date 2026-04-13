@@ -25,7 +25,6 @@ jobs:
       - id: scan
         uses: your-org/package-scanner-action@v1
         with:
-          api-base-url: "https://www.package-scanner.dev"
           working-directory: "."
           fail-on-vulnerability-severity: "high"
 

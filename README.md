@@ -10,7 +10,7 @@ The hosted PackageScanner service is available at
 ## What This Action Does
 
 - reads `package.json` and/or a supported lockfile from the checked-out workspace
-- sends their raw contents to `POST {api-base-url}/api/ci/analyze`
+- sends their raw contents to `POST https://www.package-scanner.dev/api/ci/analyze`
 - publishes `analysis-id`, `malware-count`, `vulnerability-count`, and
   severity-specific vulnerability counts
 - fails by default when malware or `high` / `critical` vulnerabilities are detected
@@ -32,8 +32,6 @@ jobs:
 
       - id: scan
         uses: your-org/package-scanner-action@v1
-        with:
-          api-base-url: "https://www.package-scanner.dev"
 
       - run: |
           echo "analysis=${{ steps.scan.outputs.analysis-id }}"
@@ -51,7 +49,6 @@ A fuller workflow example is available in `examples/consumer-workflow.yml`.
 
 | Input                            | Description                                                                                                                                              |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api-base-url`                   | PackageScanner origin URL without a trailing slash. Default: `https://www.package-scanner.dev`.                                                          |
 | `working-directory`              | Base directory for resolving lockfile and `package.json`. Default: `.`                                                                                   |
 | `lockfile`                       | Optional lockfile path relative to `working-directory`. Auto-detects `package-lock.json`, `pnpm-lock.yaml`, `pnpm-lock.yml`, `yarn.lock`, or `bun.lock`. |
 | `package-json`                   | Optional `package.json` path relative to `working-directory`. Defaults to `package.json` when that file exists.                                          |
@@ -123,8 +120,8 @@ When this action runs, it may transmit:
 - the inferred or configured package manager
 - the `enable-metadata-check` flag
 
-If your workflow must not send dependency metadata to the hosted service, point
-`api-base-url` to your own deployment instead of the default hosted endpoint.
+This action always sends data to the hosted PackageScanner service at
+`https://www.package-scanner.dev`.
 
 For safety, `working-directory`, `lockfile`, and `package-json` must resolve
 within the checked-out GitHub workspace. Absolute paths and traversal outside
@@ -135,7 +132,7 @@ the workspace are rejected.
 - run `actions/checkout` before this action so repository files are available
 - ensure `node` is available on `PATH` on self-hosted runners
 - use Node `18.17+` because the runtime relies on the built-in Fetch API
-- allow outbound HTTPS access to the configured `api-base-url`
+- allow outbound HTTPS access to `https://www.package-scanner.dev`
 
 ## Public Contract
 

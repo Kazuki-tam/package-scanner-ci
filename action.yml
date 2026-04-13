@@ -5,10 +5,6 @@ branding:
   color: "blue"
 
 inputs:
-  api-base-url:
-    description: "PackageScanner origin URL without a trailing slash (e.g. https://www.package-scanner.dev)."
-    required: false
-    default: "https://www.package-scanner.dev"
   working-directory:
     description: "Directory to resolve lockfile and package.json paths against."
     required: false
@@ -68,7 +64,6 @@ runs:
       shell: bash
       run: node "${GITHUB_ACTION_PATH:?}/dist/scan.js"
       env:
-        PACKAGE_SCANNER_API_BASE_URL: ${{ inputs.api-base-url }}
         PACKAGE_SCANNER_WORKING_DIRECTORY: ${{ inputs.working-directory }}
         PACKAGE_SCANNER_LOCKFILE: ${{ inputs.lockfile }}
         PACKAGE_SCANNER_PACKAGE_JSON: ${{ inputs.package-json }}

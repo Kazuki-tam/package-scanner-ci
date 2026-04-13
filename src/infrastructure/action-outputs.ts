@@ -16,6 +16,17 @@ function toSafeGitHubOutputValue(name: string, value: string | number): string {
   return stringValue;
 }
 
+function toSafeGitHubSummaryValue(value: string | number): string {
+  return String(value)
+    .replace(/\r?\n|\r/g, " ")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/\|/g, "&#124;");
+}
+
 export function writeGitHubOutputs(
   outputPath: string | undefined,
   {
@@ -270,7 +281,7 @@ export function writeGitHubStepSummary(
     "",
     "| Metric | Value |",
     "| --- | ---: |",
-    `| Analysis ID | \`${analysisId || "n/a"}\` |`,
+    `| Analysis ID | <code>${toSafeGitHubSummaryValue(analysisId || "n/a")}</code> |`,
     `| Packages scanned | ${totalPackages ?? "unknown"} |`,
     `| Malware findings | ${malwareCount} |`,
     `| Vulnerabilities | ${vulnerabilityCount} |`,

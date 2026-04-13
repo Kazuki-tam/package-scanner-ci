@@ -26,6 +26,14 @@ versioning for its public GitHub Action behavior.
   inputs, package.json-only scans, and malware opt-out behavior
 - rewrote README and synchronized public documentation with the current
   repository layout
+- removed the public `api-base-url` input and now always send analysis requests
+  to the hosted PackageScanner endpoint at `https://www.package-scanner.dev`
+
+### Security
+
+- reject any attempt to override the hosted API origin away from
+  `https://www.package-scanner.dev`
+- sanitize API-derived values before writing them to `GITHUB_STEP_SUMMARY`
 
 ## [0.1.0]
 

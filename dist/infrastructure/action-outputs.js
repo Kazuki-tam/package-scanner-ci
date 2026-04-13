@@ -7,6 +7,16 @@ function toSafeGitHubOutputValue(name, value) {
     }
     return stringValue;
 }
+function toSafeGitHubSummaryValue(value) {
+    return String(value)
+        .replace(/\r?\n|\r/g, " ")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+        .replace(/\|/g, "&#124;");
+}
 export function writeGitHubOutputs(outputPath, { analysisId, malwareCount, vulnerabilityCount, vulnerabilitySeverityCounts, }, { appendFileSync = fs.appendFileSync } = {}) {
     if (!outputPath) {
         return;
@@ -139,7 +149,7 @@ export function writeGitHubStepSummary(summaryPath, { analysisId, malwareCount, 
         "",
         "| Metric | Value |",
         "| --- | ---: |",
-        `| Analysis ID | \`${analysisId || "n/a"}\` |`,
+        `| Analysis ID | <code>${toSafeGitHubSummaryValue(analysisId || "n/a")}</code> |`,
         `| Packages scanned | ${totalPackages ?? "unknown"} |`,
         `| Malware findings | ${malwareCount} |`,
         `| Vulnerabilities | ${vulnerabilityCount} |`,

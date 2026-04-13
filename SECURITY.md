@@ -38,5 +38,7 @@ Current hardening measures in this repository include:
 
 - rejecting `working-directory`, `lockfile`, and `package-json` paths that
   escape the GitHub workspace
+- sending requests only to `https://www.package-scanner.dev`
 - validating GitHub Actions output values before writing to `GITHUB_OUTPUT`
+- sanitizing API-derived values before writing to `GITHUB_STEP_SUMMARY`
 - avoiding raw upstream response bodies in default error messages

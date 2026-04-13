@@ -312,12 +312,40 @@ describe("package-scanner action helper", () => {
     );
   });
 
-  it("normalizes the API URL by trimming the trailing slash", () => {
+  it("uses the hosted API URL by default", () => {
+    expect(getApiUrl({})).toBe("https://www.package-scanner.dev/api/ci/analyze");
+  });
+
+  it("accepts the hosted API URL with a trailing slash", () => {
     expect(
       getApiUrl({
-        PACKAGE_SCANNER_API_BASE_URL: "https://scanner.example.com/",
+        PACKAGE_SCANNER_API_BASE_URL: "https://www.package-scanner.dev/",
       }),
-    ).toBe("https://scanner.example.com/api/ci/analyze");
+    ).toBe("https://www.package-scanner.dev/api/ci/analyze");
+  });
+
+  it("rejects a non-HTTPS API URL", () => {
+    expect(() =>
+      getApiUrl({
+        PACKAGE_SCANNER_API_BASE_URL: "http://www.package-scanner.dev",
+      }),
+    ).toThrow(/api-base-url must use HTTPS/);
+  });
+
+  it("rejects API URLs with embedded credentials", () => {
+    expect(() =>
+      getApiUrl({
+        PACKAGE_SCANNER_API_BASE_URL: "https://user:pass@www.package-scanner.dev",
+      }),
+    ).toThrow(/api-base-url must not include credentials/);
+  });
+
+  it("rejects any non-hosted API URL", () => {
+    expect(() =>
+      getApiUrl({
+        PACKAGE_SCANNER_API_BASE_URL: "https://scanner.example.com",
+      }),
+    ).toThrow(/api-base-url must be https:\/\/www\.package-scanner\.dev\./);
   });
 
   it("posts the request and writes GitHub outputs", async () => {
@@ -329,7 +357,7 @@ describe("package-scanner action helper", () => {
 
     const fetchImpl = (async (input: Parameters<typeof fetch>[0], init: RequestInit = {}) => {
       const url = typeof input === "string" || input instanceof URL ? input : input.url;
-      expect(url).toBe("https://scanner.example.com/api/ci/analyze");
+      expect(url).toBe("https://www.package-scanner.dev/api/ci/analyze");
       expect(init.method).toBe("POST");
       expect(init.body).toBe(
         JSON.stringify({
@@ -355,7 +383,6 @@ describe("package-scanner action helper", () => {
       env: {
         GITHUB_WORKSPACE: workspace,
         GITHUB_OUTPUT: "/tmp/github-output.txt",
-        PACKAGE_SCANNER_API_BASE_URL: "https://scanner.example.com/",
         PACKAGE_SCANNER_ENABLE_METADATA_CHECK: "true",
       },
       cwd: workspace,
@@ -430,7 +457,42 @@ describe("package-scanner action helper", () => {
     expect(fsModule.writes).toContainEqual({
       path: "/tmp/step-summary.md",
       value:
-        "## PackageScanner summary\n\n| Metric | Value |\n| --- | ---: |\n| Analysis ID | `an_summary` |\n| Packages scanned | 3 |\n| Malware findings | 0 |\n| Vulnerabilities | 3 |\n| Low | 1 |\n| Moderate | 1 |\n| High | 0 |\n| Critical | 1 |\n\nBlocking policy: malware disabled, vulnerabilities at or above `off`.\n\n",
+        "## PackageScanner summary\n\n| Metric | Value |\n| --- | ---: |\n| Analysis ID | <code>an_summary</code> |\n| Packages scanned | 3 |\n| Malware findings | 0 |\n| Vulnerabilities | 3 |\n| Low | 1 |\n| Moderate | 1 |\n| High | 0 |\n| Critical | 1 |\n\nBlocking policy: malware disabled, vulnerabilities at or above `off`.\n\n",
+    });
+  });
+
+  it("escapes API-controlled values in the GitHub step summary", async () => {
+    const workspace = "/workspace";
+    const fsModule = createFakeFs({
+      [path.join(workspace, "package.json")]: '{"name":"demo","version":"1.0.0"}',
+    });
+
+    await runPackageScannerAction({
+      env: {
+        GITHUB_WORKSPACE: workspace,
+        GITHUB_STEP_SUMMARY: "/tmp/step-summary.md",
+        PACKAGE_SCANNER_FAIL_ON_MALWARE: "false",
+        PACKAGE_SCANNER_FAIL_ON_VULNERABILITY_SEVERITY: "off",
+      },
+      cwd: workspace,
+      fetchImpl: async () =>
+        new Response(
+          JSON.stringify({
+            analysisId: 'bad|id\n<script>alert("xss")</script>',
+            malware: [],
+            vulnerabilities: [],
+            summary: { total: 1, vulnerabilityCount: 0 },
+          }),
+          { status: 200 },
+        ),
+      fsModule: asFsModule(fsModule),
+      pathModule: path,
+    });
+
+    expect(fsModule.writes).toContainEqual({
+      path: "/tmp/step-summary.md",
+      value:
+        "## PackageScanner summary\n\n| Metric | Value |\n| --- | ---: |\n| Analysis ID | <code>bad&#124;id &lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;</code> |\n| Packages scanned | 1 |\n| Malware findings | 0 |\n| Vulnerabilities | 0 |\n| Low | 0 |\n| Moderate | 0 |\n| High | 0 |\n| Critical | 0 |\n\nBlocking policy: malware disabled, vulnerabilities at or above `off`.\n\n",
     });
   });
 

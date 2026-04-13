@@ -71,24 +71,23 @@ Notes:
 - `actions/checkout` must run before this Action
 - Node.js `18.17+` must be available on the runner
 - On self-hosted runners, `node` must be on `PATH`
-- The workflow must allow outbound HTTPS access to the configured
-  `api-base-url`
+- The workflow must allow outbound HTTPS access to
+  `https://www.package-scanner.dev`
 
 ## 5. Public Inputs
 
 The following inputs are defined by `action.yml` and are part of the Action's
 public interface.
 
-| Name                             | Type                                         | Required | Default                           | Description                                                                            |
-| -------------------------------- | -------------------------------------------- | -------- | --------------------------------- | -------------------------------------------------------------------------------------- |
-| `api-base-url`                   | string                                       | No       | `https://www.package-scanner.dev` | Base origin of the PackageScanner deployment. A trailing slash is not recommended.     |
-| `working-directory`              | string                                       | No       | `.`                               | Base directory used to resolve `lockfile` and `package.json`.                          |
-| `lockfile`                       | string                                       | No       | `""`                              | Lockfile path relative to `working-directory`. Auto-detected when omitted.             |
-| `package-json`                   | string                                       | No       | `""`                              | `package.json` path relative to `working-directory`. Uses `package.json` when omitted. |
-| `package-manager`                | `npm \| pnpm \| yarn \| bun`                 | No       | `""`                              | Optional override when the package manager cannot be inferred from the lockfile name.  |
-| `fail-on-malware`                | string                                       | No       | `"true"`                          | If set to `"false"`, the step stays successful even when malware is detected.          |
-| `fail-on-vulnerability-severity` | `off \| low \| moderate \| high \| critical` | No       | `"high"`                          | Lowest vulnerability severity that fails the step. `high` means `high` and `critical`. |
-| `enable-metadata-check`          | string                                       | No       | `"false"`                         | If set to `"true"`, requests additional npm metadata checks. Requires `package.json`.  |
+| Name                             | Type                                         | Required | Default   | Description                                                                            |
+| -------------------------------- | -------------------------------------------- | -------- | --------- | -------------------------------------------------------------------------------------- |
+| `working-directory`              | string                                       | No       | `.`       | Base directory used to resolve `lockfile` and `package.json`.                          |
+| `lockfile`                       | string                                       | No       | `""`      | Lockfile path relative to `working-directory`. Auto-detected when omitted.             |
+| `package-json`                   | string                                       | No       | `""`      | `package.json` path relative to `working-directory`. Uses `package.json` when omitted. |
+| `package-manager`                | `npm \| pnpm \| yarn \| bun`                 | No       | `""`      | Optional override when the package manager cannot be inferred from the lockfile name.  |
+| `fail-on-malware`                | string                                       | No       | `"true"`  | If set to `"false"`, the step stays successful even when malware is detected.          |
+| `fail-on-vulnerability-severity` | `off \| low \| moderate \| high \| critical` | No       | `"high"`  | Lowest vulnerability severity that fails the step. `high` means `high` and `critical`. |
+| `enable-metadata-check`          | string                                       | No       | `"false"` | If set to `"true"`, requests additional npm metadata checks. Requires `package.json`.  |
 
 ## 6. Public Outputs
 
@@ -117,7 +116,7 @@ Notes:
 
 The Action sends a JSON request to:
 
-- `POST {api-base-url}/api/ci/analyze`
+- `POST https://www.package-scanner.dev/api/ci/analyze`
 
 Request headers:
 
@@ -153,8 +152,7 @@ Validation rules enforced by the Action before sending:
 
 - At least one of `lockfileContent` or `packageJsonContent` must exist
 - If a lockfile is sent, the package manager must be known
-
-Additional server-side validation may still apply.
+  Additional server-side validation may still apply.
 
 Vulnerability failure threshold:
 
@@ -177,9 +175,8 @@ The Action may transmit:
 
 The Action does not read arbitrary files outside the GitHub workspace.
 
-If your workflow should not send dependency metadata to the hosted
-PackageScanner service, point `api-base-url` to your own deployment instead of
-using the default hosted endpoint.
+This Action always sends dependency metadata to the hosted PackageScanner
+service at `https://www.package-scanner.dev`.
 
 ## 9. Failure Conditions
 
@@ -254,7 +251,6 @@ jobs:
       - id: scan
         uses: your-org/package-scanner-action@v1
         with:
-          api-base-url: "https://www.package-scanner.dev"
           working-directory: "."
           fail-on-malware: "true"
           fail-on-vulnerability-severity: "high"

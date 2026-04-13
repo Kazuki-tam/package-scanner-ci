@@ -1,5 +1,21 @@
 import { getTrimmedEnv } from "./action-inputs.js";
 export const DEFAULT_API_BASE_URL = "https://www.package-scanner.dev";
+function normalizeApiBaseUrl(baseUrl) {
+    let url;
+    try {
+        url = new URL(baseUrl);
+    }
+    catch {
+        throw new Error("PackageScanner: api-base-url must be a valid HTTPS URL.");
+    }
+    if (url.protocol !== "https:") {
+        throw new Error("PackageScanner: api-base-url must use HTTPS.");
+    }
+    if (url.username || url.password) {
+        throw new Error("PackageScanner: api-base-url must not include credentials.");
+    }
+    return url.toString().replace(/\/+$/, "");
+}
 export function createRequestBody({ lockfileContent, manager, packageJsonContent, enableMetadataCheck = false, }) {
     if (!lockfileContent && !packageJsonContent) {
         throw new Error("PackageScanner: no lockfile or package.json found. Commit a lockfile or package.json, or set inputs.");
@@ -24,8 +40,12 @@ export function createRequestBody({ lockfileContent, manager, packageJsonContent
     return body;
 }
 export function getApiUrl(env) {
-    const baseUrl = getTrimmedEnv(env, "PACKAGE_SCANNER_API_BASE_URL") || DEFAULT_API_BASE_URL;
-    return `${baseUrl.replace(/\/+$/, "")}/api/ci/analyze`;
+    const configuredBaseUrl = getTrimmedEnv(env, "PACKAGE_SCANNER_API_BASE_URL");
+    const normalizedBaseUrl = normalizeApiBaseUrl(configuredBaseUrl || DEFAULT_API_BASE_URL);
+    if (normalizedBaseUrl !== DEFAULT_API_BASE_URL) {
+        throw new Error(`PackageScanner: api-base-url must be ${DEFAULT_API_BASE_URL}.`);
+    }
+    return `${DEFAULT_API_BASE_URL}/api/ci/analyze`;
 }
 export function parseJsonResponseText(text) {
     try {
