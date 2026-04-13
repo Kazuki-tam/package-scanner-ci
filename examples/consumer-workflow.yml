@@ -1,0 +1,39 @@
+name: PackageScanner
+
+on:
+  pull_request:
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-lock.yml"
+      - "yarn.lock"
+      - "bun.lock"
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: scan
+        uses: your-org/package-scanner-action@v1
+        with:
+          api-base-url: "https://www.package-scanner.dev"
+          working-directory: "."
+          fail-on-vulnerability-severity: "high"
+
+      - run: |
+          echo "analysis=${{ steps.scan.outputs.analysis-id }}"
+          echo "malware=${{ steps.scan.outputs.malware-count }}"
+          echo "vulns=${{ steps.scan.outputs.vulnerability-count }}"
+          echo "low=${{ steps.scan.outputs.vulnerability-low-count }}"
+          echo "moderate=${{ steps.scan.outputs.vulnerability-moderate-count }}"
+          echo "high=${{ steps.scan.outputs.vulnerability-high-count }}"
+          echo "critical=${{ steps.scan.outputs.vulnerability-critical-count }}"

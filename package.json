@@ -1,0 +1,48 @@
+{
+  "name": "@packagescanner/github-action",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Reusable GitHub Action for sending lockfiles and package manifests to the PackageScanner CI API.",
+  "keywords": [
+    "github-action",
+    "malware",
+    "npm",
+    "security",
+    "supply-chain"
+  ],
+  "homepage": "https://www.package-scanner.dev/ja",
+  "license": "MIT",
+  "files": [
+    "action.yml",
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE",
+    "examples"
+  ],
+  "type": "module",
+  "scripts": {
+    "clean": "node scripts/clean-dist.mjs",
+    "prebuild": "node scripts/clean-dist.mjs",
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "check": "pnpm run lint && pnpm run fmt:check && pnpm run test",
+    "prepack": "pnpm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "oxfmt": "^0.45.0",
+    "oxlint": "^1.60.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "packageManager": "pnpm@9.15.9"
+}

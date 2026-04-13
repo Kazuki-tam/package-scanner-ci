@@ -1,0 +1,78 @@
+name: "PackageScanner analyze"
+description: "Send package.json and/or a lockfile to the PackageScanner hosted API (POST /api/ci/analyze)."
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  api-base-url:
+    description: "PackageScanner origin URL without a trailing slash (e.g. https://www.package-scanner.dev)."
+    required: false
+    default: "https://www.package-scanner.dev"
+  working-directory:
+    description: "Directory to resolve lockfile and package.json paths against."
+    required: false
+    default: "."
+  lockfile:
+    description: "Path to a lockfile relative to working-directory. If omitted, auto-detects package-lock.json, pnpm-lock.yaml, pnpm-lock.yml, yarn.lock, or bun.lock."
+    required: false
+    default: ""
+  package-json:
+    description: "Path to package.json relative to working-directory. Defaults to package.json when that file exists."
+    required: false
+    default: ""
+  package-manager:
+    description: "Lockfile package manager (npm, pnpm, yarn, bun). If omitted, inferred from the lockfile file name when possible."
+    required: false
+    default: ""
+  fail-on-malware:
+    description: "Exit with failure when any malware is reported."
+    required: false
+    default: "true"
+  fail-on-vulnerability-severity:
+    description: "Lowest vulnerability severity that fails the step: off, low, moderate, high, or critical."
+    required: false
+    default: "high"
+  enable-metadata-check:
+    description: "Enable npm registry metadata checks (requires package.json in the request)."
+    required: false
+    default: "false"
+
+outputs:
+  analysis-id:
+    description: "Analysis id from the API response."
+    value: ${{ steps.run.outputs.analysis-id }}
+  malware-count:
+    description: "Number of malware findings."
+    value: ${{ steps.run.outputs.malware-count }}
+  vulnerability-count:
+    description: "Number of OSV vulnerability findings (CVE/GHSA etc.)."
+    value: ${{ steps.run.outputs.vulnerability-count }}
+  vulnerability-low-count:
+    description: "Number of low severity vulnerability findings."
+    value: ${{ steps.run.outputs.vulnerability-low-count }}
+  vulnerability-moderate-count:
+    description: "Number of moderate severity vulnerability findings."
+    value: ${{ steps.run.outputs.vulnerability-moderate-count }}
+  vulnerability-high-count:
+    description: "Number of high severity vulnerability findings."
+    value: ${{ steps.run.outputs.vulnerability-high-count }}
+  vulnerability-critical-count:
+    description: "Number of critical severity vulnerability findings."
+    value: ${{ steps.run.outputs.vulnerability-critical-count }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: run
+      shell: bash
+      run: node "${GITHUB_ACTION_PATH:?}/dist/scan.js"
+      env:
+        PACKAGE_SCANNER_API_BASE_URL: ${{ inputs.api-base-url }}
+        PACKAGE_SCANNER_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        PACKAGE_SCANNER_LOCKFILE: ${{ inputs.lockfile }}
+        PACKAGE_SCANNER_PACKAGE_JSON: ${{ inputs.package-json }}
+        PACKAGE_SCANNER_PACKAGE_MANAGER: ${{ inputs.package-manager }}
+        PACKAGE_SCANNER_FAIL_ON_MALWARE: ${{ inputs.fail-on-malware }}
+        PACKAGE_SCANNER_FAIL_ON_VULNERABILITY_SEVERITY: ${{ inputs.fail-on-vulnerability-severity }}
+        PACKAGE_SCANNER_ENABLE_METADATA_CHECK: ${{ inputs.enable-metadata-check }}
