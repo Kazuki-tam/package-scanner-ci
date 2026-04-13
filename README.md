@@ -4,6 +4,7 @@ GitHub Action for sending a repository's supported lockfile and/or `package.json
 to the PackageScanner CI API.
 
 Japanese docs:
+
 - [README](README.ja.md)
 - [Consumer Guide](docs/CONSUMER-GUIDE.ja.md)
 - [API Spec](docs/API-SPEC.ja.md)

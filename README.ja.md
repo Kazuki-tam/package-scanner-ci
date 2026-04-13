@@ -48,15 +48,15 @@ jobs:
 
 ## Inputs
 
-| Input                            | 説明 |
-| -------------------------------- | ---- |
-| `working-directory`              | ロックファイルと `package.json` を解決する基準ディレクトリです。デフォルトは `.` です。 |
+| Input                            | 説明                                                                                                                                                                                |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `working-directory`              | ロックファイルと `package.json` を解決する基準ディレクトリです。デフォルトは `.` です。                                                                                             |
 | `lockfile`                       | `working-directory` からの相対パスで指定する任意のロックファイルです。未指定時は `package-lock.json`、`pnpm-lock.yaml`、`pnpm-lock.yml`、`yarn.lock`、`bun.lock` を自動検出します。 |
-| `package-json`                   | `working-directory` からの相対パスで指定する任意の `package.json` です。ファイルが存在する場合はデフォルトで `package.json` を読みます。 |
-| `package-manager`                | ロックファイル名から判定できない場合に `npm`、`pnpm`、`yarn`、`bun` を明示指定します。 |
-| `fail-on-malware`                | マルウェアが見つかっても step を成功扱いにしたい場合は `false` を指定します。デフォルトは `true` です。 |
-| `fail-on-vulnerability-severity` | step を失敗させる最小の脆弱性重大度です。`off`、`low`、`moderate`、`high`、`critical` を指定でき、デフォルトは `high` です。 |
-| `enable-metadata-check`          | npm メタデータの追加チェックを含める場合は `true` を指定します。`package.json` が必要です。デフォルトは `false` です。 |
+| `package-json`                   | `working-directory` からの相対パスで指定する任意の `package.json` です。ファイルが存在する場合はデフォルトで `package.json` を読みます。                                            |
+| `package-manager`                | ロックファイル名から判定できない場合に `npm`、`pnpm`、`yarn`、`bun` を明示指定します。                                                                                              |
+| `fail-on-malware`                | マルウェアが見つかっても step を成功扱いにしたい場合は `false` を指定します。デフォルトは `true` です。                                                                             |
+| `fail-on-vulnerability-severity` | step を失敗させる最小の脆弱性重大度です。`off`、`low`、`moderate`、`high`、`critical` を指定でき、デフォルトは `high` です。                                                        |
+| `enable-metadata-check`          | npm メタデータの追加チェックを含める場合は `true` を指定します。`package.json` が必要です。デフォルトは `false` です。                                                              |
 
 ## Outputs
 

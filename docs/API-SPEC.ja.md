@@ -71,28 +71,28 @@
 
 次の inputs は `action.yml` で定義されており、Action の公開インターフェースの一部です。
 
-| Name                             | Type                                         | Required | Default   | Description |
-| -------------------------------- | -------------------------------------------- | -------- | --------- | ----------- |
-| `working-directory`              | string                                       | No       | `.`       | `lockfile` と `package.json` を解決する基準ディレクトリです。 |
-| `lockfile`                       | string                                       | No       | `""`      | `working-directory` からの相対パスで指定するロックファイルです。未指定時は自動検出されます。 |
+| Name                             | Type                                         | Required | Default   | Description                                                                                              |
+| -------------------------------- | -------------------------------------------- | -------- | --------- | -------------------------------------------------------------------------------------------------------- |
+| `working-directory`              | string                                       | No       | `.`       | `lockfile` と `package.json` を解決する基準ディレクトリです。                                            |
+| `lockfile`                       | string                                       | No       | `""`      | `working-directory` からの相対パスで指定するロックファイルです。未指定時は自動検出されます。             |
 | `package-json`                   | string                                       | No       | `""`      | `working-directory` からの相対パスで指定する `package.json` です。未指定時は `package.json` を使います。 |
-| `package-manager`                | `npm \| pnpm \| yarn \| bun`                 | No       | `""`      | ロックファイル名から package manager を推定できない場合の任意の上書き指定です。 |
-| `fail-on-malware`                | string                                       | No       | `"true"`  | `"false"` を指定すると、マルウェア検出時も step は成功のままになります。 |
-| `fail-on-vulnerability-severity` | `off \| low \| moderate \| high \| critical` | No       | `"high"`  | step を失敗させる最小の脆弱性重大度です。`high` は `high` と `critical` を意味します。 |
-| `enable-metadata-check`          | string                                       | No       | `"false"` | `"true"` を指定すると追加の npm metadata check を要求します。`package.json` が必要です。 |
+| `package-manager`                | `npm \| pnpm \| yarn \| bun`                 | No       | `""`      | ロックファイル名から package manager を推定できない場合の任意の上書き指定です。                          |
+| `fail-on-malware`                | string                                       | No       | `"true"`  | `"false"` を指定すると、マルウェア検出時も step は成功のままになります。                                 |
+| `fail-on-vulnerability-severity` | `off \| low \| moderate \| high \| critical` | No       | `"high"`  | step を失敗させる最小の脆弱性重大度です。`high` は `high` と `critical` を意味します。                   |
+| `enable-metadata-check`          | string                                       | No       | `"false"` | `"true"` を指定すると追加の npm metadata check を要求します。`package.json` が必要です。                 |
 
 ## 6. 公開 Outputs
 
 この Action は次の outputs を公開します。
 
-| Name                           | Type   | Description |
-| ------------------------------ | ------ | ----------- |
-| `analysis-id`                  | string | サービスが返した analysis ID |
-| `malware-count`                | string | マルウェア検出件数 |
-| `vulnerability-count`          | string | 脆弱性検出件数 |
-| `vulnerability-low-count`      | string | `low` 重大度の脆弱性件数 |
+| Name                           | Type   | Description                   |
+| ------------------------------ | ------ | ----------------------------- |
+| `analysis-id`                  | string | サービスが返した analysis ID  |
+| `malware-count`                | string | マルウェア検出件数            |
+| `vulnerability-count`          | string | 脆弱性検出件数                |
+| `vulnerability-low-count`      | string | `low` 重大度の脆弱性件数      |
 | `vulnerability-moderate-count` | string | `moderate` 重大度の脆弱性件数 |
-| `vulnerability-high-count`     | string | `high` 重大度の脆弱性件数 |
+| `vulnerability-high-count`     | string | `high` 重大度の脆弱性件数     |
 | `vulnerability-critical-count` | string | `critical` 重大度の脆弱性件数 |
 
 補足:

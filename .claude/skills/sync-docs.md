@@ -18,13 +18,14 @@ Propagate documentation updates to their translated counterparts and related doc
 
 Translation pairs in this project:
 
-| English (source of truth) | Japanese translation |
-|---|---|
-| `README.md` | `README.ja.md` |
-| `docs/API-SPEC.md` | `docs/API-SPEC.ja.md` |
-| `docs/CONSUMER-GUIDE.md` | `docs/CONSUMER-GUIDE.ja.md` |
+| English (source of truth) | Japanese translation        |
+| ------------------------- | --------------------------- |
+| `README.md`               | `README.ja.md`              |
+| `docs/API-SPEC.md`        | `docs/API-SPEC.ja.md`       |
+| `docs/CONSUMER-GUIDE.md`  | `docs/CONSUMER-GUIDE.ja.md` |
 
 Related documents that may need updates depending on the change:
+
 - `action.yml` — canonical definition of inputs/outputs. Changes here require updates to README and API-SPEC in both languages
 - `CHANGELOG.md` — update when public behavior changes
 - `examples/consumer-workflow.yml` — workflow examples referenced by CONSUMER-GUIDE in both languages
@@ -56,12 +57,14 @@ Read the diff of each changed file and determine:
 Identify the translation counterpart for each changed file and sync using these rules:
 
 **English → Japanese (normal flow):**
+
 1. Identify the changed sections in the English file
 2. Locate the corresponding sections in the Japanese file
 3. Translate the changes into Japanese and apply
 4. Keep code blocks, YAML examples, URLs, and variable names unchanged (do not translate)
 
 **Japanese → English (reverse flow):**
+
 1. Check if the Japanese change contains new content not in the English version
 2. If so, propose reflecting it in the English version
 3. If it is only a translation fix, no English changes needed
@@ -70,15 +73,15 @@ Identify the translation counterpart for each changed file and sync using these 
 
 Check the following cascade rules and update related documents when applicable:
 
-| Source | Cascade targets | Condition |
-|---|---|---|
-| `action.yml` | README (en/ja), API-SPEC (en/ja) | inputs/outputs/description changed |
-| `README.md` | `README.ja.md` | always |
-| `docs/API-SPEC.md` | `docs/API-SPEC.ja.md` | always |
-| `docs/CONSUMER-GUIDE.md` | `docs/CONSUMER-GUIDE.ja.md` | always |
-| README inputs/outputs tables | API-SPEC corresponding tables | table content changed |
-| API-SPEC failure conditions | CONSUMER-GUIDE troubleshooting | error messages changed |
-| `examples/consumer-workflow.yml` | CONSUMER-GUIDE (en/ja) code examples | workflow example changed |
+| Source                           | Cascade targets                      | Condition                          |
+| -------------------------------- | ------------------------------------ | ---------------------------------- |
+| `action.yml`                     | README (en/ja), API-SPEC (en/ja)     | inputs/outputs/description changed |
+| `README.md`                      | `README.ja.md`                       | always                             |
+| `docs/API-SPEC.md`               | `docs/API-SPEC.ja.md`                | always                             |
+| `docs/CONSUMER-GUIDE.md`         | `docs/CONSUMER-GUIDE.ja.md`          | always                             |
+| README inputs/outputs tables     | API-SPEC corresponding tables        | table content changed              |
+| API-SPEC failure conditions      | CONSUMER-GUIDE troubleshooting       | error messages changed             |
+| `examples/consumer-workflow.yml` | CONSUMER-GUIDE (en/ja) code examples | workflow example changed           |
 
 ### Step 5: Consistency Check
 
