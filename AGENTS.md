@@ -1,6 +1,7 @@
 # PackageScanner OSS Maintenance Guide
 
 ## Dev environment tips
+
 - Use Node `18.17+`; CI currently runs on Node `20`, so prefer matching that locally when possible.
 - Enable Corepack before installing dependencies: `corepack enable`.
 - Install dependencies with `pnpm install`.
@@ -9,6 +10,7 @@
 - Keep consumer-facing docs aligned with behavior changes, especially `README.md`, `docs/API-SPEC.md`, and `examples/consumer-workflow.yml`.
 
 ## Repository map
+
 - `action.yml`: public GitHub Action inputs, outputs, and runtime contract.
 - `src/entrypoints`: action entrypoints.
 - `src/application`: orchestration for the action flow.
@@ -19,6 +21,7 @@
 - `.github/workflows/ci.yml`: the authoritative CI validation plan.
 
 ## Testing instructions
+
 - Start with the same flow used in CI: `pnpm run check` and then `pnpm run build`.
 - `pnpm run check` already covers linting, formatting checks, and Vitest, so use it as the default pre-PR validation command.
 - Run `pnpm test` for the unit suite only.
@@ -28,6 +31,7 @@
 - Add or update focused tests when public behavior, branching logic, path validation, or failure thresholds change.
 
 ## PR instructions
+
 - Keep pull requests focused on one user-visible change or one maintenance concern.
 - Before opening or merging a PR, run `pnpm run check` and `pnpm run build`.
 - Review `dist/` changes carefully and confirm they are generated from the current source changes only.
@@ -35,6 +39,7 @@
 - If behavior visible to action consumers changes, update `README.md` and `docs/API-SPEC.md` in the same PR.
 
 ## Release notes
+
 - Before tagging a release, run `pnpm run check`.
 - Rebuild with `pnpm run build`.
 - Review the committed `dist/` diff.
@@ -42,6 +47,7 @@
 - Publish or move the major tag such as `v1` only after confirming the checked-in build output matches the release commit.
 
 ## Project-specific conventions
+
 - Keep the runtime action thin; push decision logic into small testable modules under `src/`.
 - Prefer explicit, consumer-oriented error messages because this project runs inside GitHub Actions logs.
 - Preserve workspace safety checks that prevent inputs from resolving outside the checked-out repository.
