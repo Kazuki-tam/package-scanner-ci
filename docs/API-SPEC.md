@@ -251,7 +251,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - id: scan
-        uses: your-org/package-scanner-action@v1
+        uses: Kazuki-tam/package-scanner-ci@v1
         with:
           working-directory: "."
           fail-on-malware: "true"
@@ -269,7 +269,7 @@ jobs:
 ## 12. Compatibility and Versioning
 
 - Consumers should reference a major tag such as
-  `your-org/package-scanner-action@v1`
+  `Kazuki-tam/package-scanner-ci@v1`
 - Breaking changes should be released under a new major tag such as `v2`
 - Backward-compatible changes may be released under the existing major series
 - Public documentation should stay aligned with `action.yml` and the runtime

@@ -229,7 +229,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - id: scan
-        uses: your-org/package-scanner-action@v1
+        uses: Kazuki-tam/package-scanner-ci@v1
         with:
           working-directory: "."
           fail-on-malware: "true"
@@ -246,7 +246,7 @@ jobs:
 
 ## 12. 互換性とバージョニング
 
-- 利用者は `your-org/package-scanner-action@v1` のようなメジャータグを参照してください
+- 利用者は `Kazuki-tam/package-scanner-ci@v1` のようなメジャータグを参照してください
 - 互換性を壊す変更は `v2` のような新しいメジャータグでリリースすべきです
 - 後方互換のある変更は既存メジャー系列内でリリースできます
 - 公開ドキュメントは `action.yml` と、`src/entrypoints/action.ts` および `src/application/run-package-scanner-action.ts` の実行時挙動に合わせておく必要があります

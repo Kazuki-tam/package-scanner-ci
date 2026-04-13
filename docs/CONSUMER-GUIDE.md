@@ -63,7 +63,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - id: scan
-        uses: your-org/package-scanner-action@v1
+        uses: Kazuki-tam/package-scanner-ci@v1
 ```
 
 By default, the Action:
@@ -84,7 +84,7 @@ This is the most common setup for monorepos or app-in-subfolder repositories:
 
 ```yaml
 - id: scan
-  uses: your-org/package-scanner-action@v1
+  uses: Kazuki-tam/package-scanner-ci@v1
   with:
     working-directory: "apps/web"
 ```
@@ -95,7 +95,7 @@ Use this when auto-detection is not enough or when you want to be explicit:
 
 ```yaml
 - id: scan
-  uses: your-org/package-scanner-action@v1
+  uses: Kazuki-tam/package-scanner-ci@v1
   with:
     working-directory: "."
     lockfile: "pnpm-lock.yaml"
@@ -108,7 +108,7 @@ when inference is not possible for your setup:
 
 ```yaml
 - id: scan
-  uses: your-org/package-scanner-action@v1
+  uses: Kazuki-tam/package-scanner-ci@v1
   with:
     lockfile: "custom/path/to/lockfile"
     package-manager: "pnpm"
@@ -129,7 +129,7 @@ Example:
 
 ```yaml
 - id: scan
-  uses: your-org/package-scanner-action@v1
+  uses: Kazuki-tam/package-scanner-ci@v1
   with:
     fail-on-vulnerability-severity: "critical"
 ```
@@ -138,7 +138,7 @@ If you want the scan to report malware without blocking the workflow, set:
 
 ```yaml
 - id: scan
-  uses: your-org/package-scanner-action@v1
+  uses: Kazuki-tam/package-scanner-ci@v1
   with:
     fail-on-malware: "false"
 ```
@@ -150,7 +150,7 @@ This requires `package.json` to be included in the scan request.
 
 ```yaml
 - id: scan
-  uses: your-org/package-scanner-action@v1
+  uses: Kazuki-tam/package-scanner-ci@v1
   with:
     enable-metadata-check: "true"
 ```
@@ -205,12 +205,44 @@ jobs:
       - uses: actions/checkout@v4
 
       - id: scan
-        uses: your-org/package-scanner-action@v1
+        uses: Kazuki-tam/package-scanner-ci@v1
         with:
           working-directory: "apps/web"
           fail-on-vulnerability-severity: "high"
           enable-metadata-check: "true"
 ```
+
+## Example: Daily Scheduled Scan
+
+This is useful when you want to catch newly disclosed malware or
+vulnerabilities even if your lockfile has not changed recently:
+
+```yaml
+name: PackageScanner Daily Check
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: scan
+        uses: Kazuki-tam/package-scanner-ci@v1
+        with:
+          fail-on-vulnerability-severity: "high"
+          enable-metadata-check: "true"
+```
+
+GitHub Actions `schedule` uses UTC. Adjust the cron expression to match the
+time window that makes sense for your team.
 
 ## What Data Leaves Your Repository
 
@@ -261,7 +293,7 @@ If you want a non-blocking rollout first, start with:
 
 ```yaml
 - id: scan
-  uses: your-org/package-scanner-action@v1
+  uses: Kazuki-tam/package-scanner-ci@v1
   with:
     fail-on-malware: "false"
     fail-on-vulnerability-severity: "off"

@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - id: scan
-        uses: your-org/package-scanner-action@v1
+        uses: Kazuki-tam/package-scanner-ci@v1
 
       - run: |
           echo "analysis=${{ steps.scan.outputs.analysis-id }}"
