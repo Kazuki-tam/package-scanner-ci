@@ -60,7 +60,7 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1
@@ -202,7 +202,7 @@ jobs:
   scan-web:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1
@@ -232,7 +232,7 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1
