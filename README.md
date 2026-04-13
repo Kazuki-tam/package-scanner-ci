@@ -3,6 +3,11 @@
 GitHub Action for sending a repository's supported lockfile and/or `package.json`
 to the PackageScanner CI API.
 
+Japanese docs:
+- [README](README.ja.md)
+- [Consumer Guide](docs/CONSUMER-GUIDE.ja.md)
+- [API Spec](docs/API-SPEC.ja.md)
+
 The hosted PackageScanner service is available at
 `https://www.package-scanner.dev`, with a product overview at
 `https://www.package-scanner.dev/ja`.

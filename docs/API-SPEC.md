@@ -1,5 +1,7 @@
 # PackageScanner GitHub Action Specification
 
+Japanese version: [docs/API-SPEC.ja.md](API-SPEC.ja.md)
+
 ## 1. Purpose
 
 This document describes the public behavior of the PackageScanner GitHub Action

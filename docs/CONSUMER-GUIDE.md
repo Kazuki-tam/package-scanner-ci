@@ -1,5 +1,7 @@
 # PackageScanner Consumer Guide
 
+Japanese version: [docs/CONSUMER-GUIDE.ja.md](CONSUMER-GUIDE.ja.md)
+
 This guide is for teams who want to use the public PackageScanner GitHub Action
 from their own repositories.
 

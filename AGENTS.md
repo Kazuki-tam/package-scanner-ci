@@ -1,5 +1,7 @@
 # PackageScanner OSS Maintenance Guide
 
+Treat this file as the primary maintenance guide for the repository, and keep `CLAUDE.md` aligned as a repository-specific pointer to this document.
+
 ## Dev environment tips
 
 - Use Node `18.17+`; CI currently runs on Node `20`, so prefer matching that locally when possible.
