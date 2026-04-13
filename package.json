@@ -26,6 +26,7 @@
     "prebuild": "node scripts/clean-dist.mjs",
     "build": "tsc",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
@@ -36,6 +37,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
+    "@vitest/coverage-v8": "^4.1.4",
     "oxfmt": "^0.45.0",
     "oxlint": "^1.60.0",
     "typescript": "^6.0.2",

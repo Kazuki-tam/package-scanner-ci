@@ -24,6 +24,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # package.json "check": lint, fmt:check, and test (Vitest)
       - run: pnpm run check
 
       - run: pnpm run build
