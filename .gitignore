@@ -1,2 +1,28 @@
-node_modules
-coverage
+node_modules/
+coverage/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+.envrc
+*.local
+.npmrc
+
+# Private keys and certificates
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+
+# Credential and secret dumps
+secrets.*
+*.secret
+*.secrets
+credentials.json
+
+# OS and editor noise
+.DS_Store
+*.log
