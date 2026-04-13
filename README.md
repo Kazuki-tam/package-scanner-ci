@@ -44,6 +44,7 @@ jobs:
 ```
 
 A fuller workflow example is available in `examples/consumer-workflow.yml`.
+For a step-by-step setup guide, see `docs/CONSUMER-GUIDE.md`.
 
 ## Inputs
 
@@ -142,6 +143,7 @@ The primary public interface of this repository is the GitHub Action declared in
 Consumer-facing behavior is documented in:
 
 - `action.yml`
+- `docs/CONSUMER-GUIDE.md`
 - `docs/API-SPEC.md`
 - `examples/consumer-workflow.yml`
 
