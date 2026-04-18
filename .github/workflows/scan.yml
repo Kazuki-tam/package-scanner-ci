@@ -1,0 +1,29 @@
+name: PackageScanner
+
+on:
+  pull_request:
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "pnpm-lock.yaml"
+      - "yarn.lock"
+      - "bun.lock"
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  package-scanner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - id: scan
+        uses: Kazuki-tam/package-scanner-ci@v1
+
+      - run: |
+          echo "analysis=${{ steps.scan.outputs.analysis-id }}"
+          echo "malware=${{ steps.scan.outputs.malware-count }}"
