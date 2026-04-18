@@ -2,8 +2,8 @@ import fs from "node:fs";
 
 export const VULNERABILITY_SEVERITY_ORDER = ["low", "moderate", "high", "critical"] as const;
 
-export type VulnerabilitySeverity = (typeof VULNERABILITY_SEVERITY_ORDER)[number];
-export type VulnerabilitySeverityThreshold = VulnerabilitySeverity | "off";
+export type VulnerabilitySeverity = (typeof VULNERABILITY_SEVERITY_ORDER)[number] | "unknown";
+export type VulnerabilitySeverityThreshold = (typeof VULNERABILITY_SEVERITY_ORDER)[number] | "off";
 export type VulnerabilitySeverityCounts = Record<VulnerabilitySeverity, number>;
 
 function toSafeGitHubOutputValue(name: string, value: string | number): string {
@@ -101,6 +101,8 @@ function normalizeSeverityValue(value: string): VulnerabilitySeverity | null {
   const normalized = value.trim().toLowerCase();
 
   switch (normalized) {
+    case "unknown":
+      return "unknown";
     case "low":
       return "low";
     case "medium":
@@ -200,7 +202,7 @@ export function normalizeVulnerabilitySeverityThreshold(
 
   const severity = normalizeSeverityValue(normalized);
 
-  if (!severity) {
+  if (!severity || severity === "unknown") {
     throw new Error(
       "PackageScanner: invalid fail-on-vulnerability-severity. Use off, low, moderate, high, or critical.",
     );
@@ -222,7 +224,7 @@ export function countVulnerabilitiesAtOrAboveSeverity(
   return vulnerabilities.reduce<number>((count, vulnerability) => {
     const severity = getVulnerabilitySeverity(vulnerability);
 
-    if (!severity) {
+    if (!severity || severity === "unknown") {
       return count;
     }
 
@@ -234,6 +236,7 @@ export function countVulnerabilitiesBySeverity(
   vulnerabilities: unknown[],
 ): VulnerabilitySeverityCounts {
   const counts: VulnerabilitySeverityCounts = {
+    unknown: 0,
     low: 0,
     moderate: 0,
     high: 0,
@@ -285,6 +288,7 @@ export function writeGitHubStepSummary(
     `| Packages scanned | ${totalPackages ?? "unknown"} |`,
     `| Malware findings | ${malwareCount} |`,
     `| Vulnerabilities | ${vulnerabilityCount} |`,
+    `| Unknown | ${vulnerabilitySeverityCounts.unknown} |`,
     `| Low | ${vulnerabilitySeverityCounts.low} |`,
     `| Moderate | ${vulnerabilitySeverityCounts.moderate} |`,
     `| High | ${vulnerabilitySeverityCounts.high} |`,
