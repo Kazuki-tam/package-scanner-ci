@@ -1,7 +1,7 @@
 import fs from "node:fs";
 export declare const VULNERABILITY_SEVERITY_ORDER: readonly ["low", "moderate", "high", "critical"];
-export type VulnerabilitySeverity = (typeof VULNERABILITY_SEVERITY_ORDER)[number];
-export type VulnerabilitySeverityThreshold = VulnerabilitySeverity | "off";
+export type VulnerabilitySeverity = (typeof VULNERABILITY_SEVERITY_ORDER)[number] | "unknown";
+export type VulnerabilitySeverityThreshold = (typeof VULNERABILITY_SEVERITY_ORDER)[number] | "off";
 export type VulnerabilitySeverityCounts = Record<VulnerabilitySeverity, number>;
 export declare function writeGitHubOutputs(outputPath: string | undefined, { analysisId, malwareCount, vulnerabilityCount, vulnerabilitySeverityCounts, }: {
     analysisId: string;

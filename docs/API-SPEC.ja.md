@@ -90,6 +90,7 @@
 | `analysis-id`                  | string | サービスが返した analysis ID  |
 | `malware-count`                | string | マルウェア検出件数            |
 | `vulnerability-count`          | string | 脆弱性検出件数                |
+| `vulnerability-unknown-count`  | string | 重大度不明の脆弱性件数        |
 | `vulnerability-low-count`      | string | `low` 重大度の脆弱性件数      |
 | `vulnerability-moderate-count` | string | `moderate` 重大度の脆弱性件数 |
 | `vulnerability-high-count`     | string | `high` 重大度の脆弱性件数     |
@@ -211,7 +212,7 @@ Action における利用方法:
 - `analysisId` -> `analysis-id`
 - `malware.length` -> `malware-count`
 - `summary.vulnerabilityCount` または `vulnerabilities.length` -> `vulnerability-count`
-- 正規化済みの重大度バケット -> `vulnerability-low-count`、`vulnerability-moderate-count`、`vulnerability-high-count`、`vulnerability-critical-count`
+- 正規化済みの重大度バケット -> `vulnerability-unknown-count`、`vulnerability-low-count`、`vulnerability-moderate-count`、`vulnerability-high-count`、`vulnerability-critical-count`
 - `summary.total` -> コンソール要約のみに利用し、正式な Action output には含めない
 
 この Action の利用者は、バックエンドレスポンス全体ではなく、文書化された outputs に依存してください。
@@ -238,6 +239,7 @@ jobs:
 
       - run: |
           echo "analysis=${{ steps.scan.outputs.analysis-id }}"
+          echo "unknown=${{ steps.scan.outputs.vulnerability-unknown-count }}"
           echo "low=${{ steps.scan.outputs.vulnerability-low-count }}"
           echo "moderate=${{ steps.scan.outputs.vulnerability-moderate-count }}"
           echo "high=${{ steps.scan.outputs.vulnerability-high-count }}"

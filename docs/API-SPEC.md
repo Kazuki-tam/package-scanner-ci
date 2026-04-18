@@ -100,6 +100,7 @@ The Action publishes the following outputs:
 | `analysis-id`                  | string | Analysis ID returned by the service                |
 | `malware-count`                | string | Number of malware findings                         |
 | `vulnerability-count`          | string | Number of vulnerability findings                   |
+| `vulnerability-unknown-count`  | string | Number of unknown severity vulnerability findings  |
 | `vulnerability-low-count`      | string | Number of low severity vulnerability findings      |
 | `vulnerability-moderate-count` | string | Number of moderate severity vulnerability findings |
 | `vulnerability-high-count`     | string | Number of high severity vulnerability findings     |
@@ -230,9 +231,9 @@ The Action uses these values as follows:
 - `malware.length` -> `malware-count`
 - `summary.vulnerabilityCount` or `vulnerabilities.length` ->
   `vulnerability-count`
-- normalized severity buckets -> `vulnerability-low-count`,
-  `vulnerability-moderate-count`, `vulnerability-high-count`,
-  `vulnerability-critical-count`
+- normalized severity buckets -> `vulnerability-unknown-count`,
+  `vulnerability-low-count`, `vulnerability-moderate-count`,
+  `vulnerability-high-count`, `vulnerability-critical-count`
 - `summary.total` -> console summary only, not a formal Action output
 
 Consumers of this Action should rely on the documented outputs, not on the full
@@ -260,6 +261,7 @@ jobs:
 
       - run: |
           echo "analysis=${{ steps.scan.outputs.analysis-id }}"
+          echo "unknown=${{ steps.scan.outputs.vulnerability-unknown-count }}"
           echo "low=${{ steps.scan.outputs.vulnerability-low-count }}"
           echo "moderate=${{ steps.scan.outputs.vulnerability-moderate-count }}"
           echo "high=${{ steps.scan.outputs.vulnerability-high-count }}"

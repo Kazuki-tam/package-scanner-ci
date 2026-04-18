@@ -44,6 +44,9 @@ outputs:
   vulnerability-count:
     description: "Number of OSV vulnerability findings (CVE/GHSA etc.)."
     value: ${{ steps.run.outputs.vulnerability-count }}
+  vulnerability-unknown-count:
+    description: "Number of vulnerability findings with unknown severity."
+    value: ${{ steps.run.outputs.vulnerability-unknown-count }}
   vulnerability-low-count:
     description: "Number of low severity vulnerability findings."
     value: ${{ steps.run.outputs.vulnerability-low-count }}

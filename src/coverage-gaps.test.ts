@@ -174,7 +174,7 @@ describe("action outputs edge cases", () => {
         analysisId: "id",
         malwareCount: 0,
         vulnerabilityCount: 0,
-        vulnerabilitySeverityCounts: { low: 0, moderate: 0, high: 0, critical: 0 },
+        vulnerabilitySeverityCounts: { unknown: 0, low: 0, moderate: 0, high: 0, critical: 0 },
       },
       {
         appendFileSync: (_path, value) => {
@@ -194,7 +194,7 @@ describe("action outputs edge cases", () => {
           analysisId: "ok",
           malwareCount: 1,
           vulnerabilityCount: 0,
-          vulnerabilitySeverityCounts: { low: 0, moderate: 0, high: 0, critical: 0 },
+          vulnerabilitySeverityCounts: { unknown: 0, low: 0, moderate: 0, high: 0, critical: 0 },
         },
         {
           appendFileSync: () => {},
@@ -210,7 +210,7 @@ describe("action outputs edge cases", () => {
           // @ts-expect-error — exercise runtime guard for malformed numeric coercion
           malwareCount: "bad\n1",
           vulnerabilityCount: 0,
-          vulnerabilitySeverityCounts: { low: 0, moderate: 0, high: 0, critical: 0 },
+          vulnerabilitySeverityCounts: { unknown: 0, low: 0, moderate: 0, high: 0, critical: 0 },
         },
         { appendFileSync: () => {} },
       ),
@@ -225,7 +225,7 @@ describe("action outputs edge cases", () => {
         analysisId: "id",
         malwareCount: 0,
         vulnerabilityCount: 0,
-        vulnerabilitySeverityCounts: { low: 0, moderate: 0, high: 0, critical: 0 },
+        vulnerabilitySeverityCounts: { unknown: 0, low: 0, moderate: 0, high: 0, critical: 0 },
         totalPackages: null,
         failOnMalware: false,
         vulnerabilityThreshold: "off",

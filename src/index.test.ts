@@ -264,6 +264,7 @@ describe("package-scanner action helper", () => {
   it("extracts vulnerability severities from common response shapes", () => {
     expect(getVulnerabilitySeverity({ severity: "HIGH" })).toBe("high");
     expect(getVulnerabilitySeverity({ severity: "medium" })).toBe("moderate");
+    expect(getVulnerabilitySeverity({ severity: "UNKNOWN" })).toBe("unknown");
     expect(getVulnerabilitySeverity({ database_specific: { severity: "critical" } })).toBe(
       "critical",
     );
@@ -299,6 +300,7 @@ describe("package-scanner action helper", () => {
         { severity: "unknown" },
       ]),
     ).toEqual({
+      unknown: 1,
       low: 1,
       moderate: 1,
       high: 1,
@@ -398,6 +400,7 @@ describe("package-scanner action helper", () => {
       vulnerabilities: [],
       vulnerabilityCount: 0,
       vulnerabilitySeverityCounts: {
+        unknown: 0,
         low: 0,
         moderate: 0,
         high: 0,
@@ -409,6 +412,7 @@ describe("package-scanner action helper", () => {
       { path: "/tmp/github-output.txt", value: "analysis-id=an_test123\n" },
       { path: "/tmp/github-output.txt", value: "malware-count=0\n" },
       { path: "/tmp/github-output.txt", value: "vulnerability-count=0\n" },
+      { path: "/tmp/github-output.txt", value: "vulnerability-unknown-count=0\n" },
       { path: "/tmp/github-output.txt", value: "vulnerability-low-count=0\n" },
       { path: "/tmp/github-output.txt", value: "vulnerability-moderate-count=0\n" },
       { path: "/tmp/github-output.txt", value: "vulnerability-high-count=0\n" },
@@ -436,11 +440,12 @@ describe("package-scanner action helper", () => {
             analysisId: "an_summary",
             malware: [],
             vulnerabilities: [
+              { id: "GHSA-unknown", severity: "UNKNOWN" },
               { id: "GHSA-low", severity: "low" },
               { id: "GHSA-medium", severity: "medium" },
               { id: "GHSA-critical", severity: "critical" },
             ],
-            summary: { total: 3, vulnerabilityCount: 3 },
+            summary: { total: 3, vulnerabilityCount: 4 },
           }),
           { status: 200 },
         ),
@@ -449,6 +454,7 @@ describe("package-scanner action helper", () => {
     });
 
     expect(result.vulnerabilitySeverityCounts).toEqual({
+      unknown: 1,
       low: 1,
       moderate: 1,
       high: 0,
@@ -457,7 +463,7 @@ describe("package-scanner action helper", () => {
     expect(fsModule.writes).toContainEqual({
       path: "/tmp/step-summary.md",
       value:
-        "## PackageScanner summary\n\n| Metric | Value |\n| --- | ---: |\n| Analysis ID | <code>an_summary</code> |\n| Packages scanned | 3 |\n| Malware findings | 0 |\n| Vulnerabilities | 3 |\n| Low | 1 |\n| Moderate | 1 |\n| High | 0 |\n| Critical | 1 |\n\nBlocking policy: malware disabled, vulnerabilities at or above `off`.\n\n",
+        "## PackageScanner summary\n\n| Metric | Value |\n| --- | ---: |\n| Analysis ID | <code>an_summary</code> |\n| Packages scanned | 3 |\n| Malware findings | 0 |\n| Vulnerabilities | 4 |\n| Unknown | 1 |\n| Low | 1 |\n| Moderate | 1 |\n| High | 0 |\n| Critical | 1 |\n\nBlocking policy: malware disabled, vulnerabilities at or above `off`.\n\n",
     });
   });
 
@@ -492,7 +498,7 @@ describe("package-scanner action helper", () => {
     expect(fsModule.writes).toContainEqual({
       path: "/tmp/step-summary.md",
       value:
-        "## PackageScanner summary\n\n| Metric | Value |\n| --- | ---: |\n| Analysis ID | <code>bad&#124;id &lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;</code> |\n| Packages scanned | 1 |\n| Malware findings | 0 |\n| Vulnerabilities | 0 |\n| Low | 0 |\n| Moderate | 0 |\n| High | 0 |\n| Critical | 0 |\n\nBlocking policy: malware disabled, vulnerabilities at or above `off`.\n\n",
+        "## PackageScanner summary\n\n| Metric | Value |\n| --- | ---: |\n| Analysis ID | <code>bad&#124;id &lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;</code> |\n| Packages scanned | 1 |\n| Malware findings | 0 |\n| Vulnerabilities | 0 |\n| Unknown | 0 |\n| Low | 0 |\n| Moderate | 0 |\n| High | 0 |\n| Critical | 0 |\n\nBlocking policy: malware disabled, vulnerabilities at or above `off`.\n\n",
     });
   });
 
@@ -676,6 +682,7 @@ describe("package-scanner action helper", () => {
     expect(result.vulnerabilityCount).toBe(1);
     expect(result.analysisId).toBe("an_vuln_moderate");
     expect(result.vulnerabilitySeverityCounts).toEqual({
+      unknown: 0,
       low: 0,
       moderate: 1,
       high: 0,
@@ -743,6 +750,7 @@ describe("package-scanner action helper", () => {
     expect(result.vulnerabilityCount).toBe(1);
     expect(result.analysisId).toBe("an_vuln_off");
     expect(result.vulnerabilitySeverityCounts).toEqual({
+      unknown: 0,
       low: 0,
       moderate: 0,
       high: 0,

@@ -1,6 +1,6 @@
 {
   "name": "@packagescanner/github-action",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "private": false,
   "description": "Reusable GitHub Action for sending lockfiles and package manifests to the PackageScanner CI API.",
   "keywords": [

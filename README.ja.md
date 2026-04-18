@@ -37,6 +37,7 @@ jobs:
           echo "analysis=${{ steps.scan.outputs.analysis-id }}"
           echo "malware=${{ steps.scan.outputs.malware-count }}"
           echo "vulns=${{ steps.scan.outputs.vulnerability-count }}"
+          echo "unknown=${{ steps.scan.outputs.vulnerability-unknown-count }}"
           echo "low=${{ steps.scan.outputs.vulnerability-low-count }}"
           echo "moderate=${{ steps.scan.outputs.vulnerability-moderate-count }}"
           echo "high=${{ steps.scan.outputs.vulnerability-high-count }}"
@@ -63,6 +64,7 @@ jobs:
 - `analysis-id`
 - `malware-count`
 - `vulnerability-count`
+- `vulnerability-unknown-count`
 - `vulnerability-low-count`
 - `vulnerability-moderate-count`
 - `vulnerability-high-count`
@@ -80,6 +82,7 @@ PR コメントに使う例:
       const body = [
         "## PackageScanner",
         `- Malware: ${{ steps.scan.outputs.malware-count }}`,
+        `- Unknown: ${{ steps.scan.outputs.vulnerability-unknown-count }}`,
         `- Low: ${{ steps.scan.outputs.vulnerability-low-count }}`,
         `- Moderate: ${{ steps.scan.outputs.vulnerability-moderate-count }}`,
         `- High: ${{ steps.scan.outputs.vulnerability-high-count }}`,

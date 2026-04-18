@@ -162,6 +162,7 @@ The Action exposes the following outputs:
 - `analysis-id`
 - `malware-count`
 - `vulnerability-count`
+- `vulnerability-unknown-count`
 - `vulnerability-low-count`
 - `vulnerability-moderate-count`
 - `vulnerability-high-count`
@@ -177,6 +178,7 @@ Example:
     echo "analysis=${{ steps.scan.outputs.analysis-id }}"
     echo "malware=${{ steps.scan.outputs.malware-count }}"
     echo "vulns=${{ steps.scan.outputs.vulnerability-count }}"
+    echo "unknown=${{ steps.scan.outputs.vulnerability-unknown-count }}"
     echo "high=${{ steps.scan.outputs.vulnerability-high-count }}"
     echo "critical=${{ steps.scan.outputs.vulnerability-critical-count }}"
 ```

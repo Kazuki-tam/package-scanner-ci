@@ -24,6 +24,7 @@ export function writeGitHubOutputs(outputPath, { analysisId, malwareCount, vulne
     appendFileSync(outputPath, `analysis-id=${toSafeGitHubOutputValue("analysis-id", analysisId)}\n`);
     appendFileSync(outputPath, `malware-count=${toSafeGitHubOutputValue("malware-count", malwareCount)}\n`);
     appendFileSync(outputPath, `vulnerability-count=${toSafeGitHubOutputValue("vulnerability-count", vulnerabilityCount)}\n`);
+    appendFileSync(outputPath, `vulnerability-unknown-count=${toSafeGitHubOutputValue("vulnerability-unknown-count", vulnerabilitySeverityCounts.unknown)}\n`);
     appendFileSync(outputPath, `vulnerability-low-count=${toSafeGitHubOutputValue("vulnerability-low-count", vulnerabilitySeverityCounts.low)}\n`);
     appendFileSync(outputPath, `vulnerability-moderate-count=${toSafeGitHubOutputValue("vulnerability-moderate-count", vulnerabilitySeverityCounts.moderate)}\n`);
     appendFileSync(outputPath, `vulnerability-high-count=${toSafeGitHubOutputValue("vulnerability-high-count", vulnerabilitySeverityCounts.high)}\n`);
@@ -35,6 +36,8 @@ function asRecord(value) {
 function normalizeSeverityValue(value) {
     const normalized = value.trim().toLowerCase();
     switch (normalized) {
+        case "unknown":
+            return "unknown";
         case "low":
             return "low";
         case "medium":
@@ -107,7 +110,7 @@ export function normalizeVulnerabilitySeverityThreshold(value) {
         return "off";
     }
     const severity = normalizeSeverityValue(normalized);
-    if (!severity) {
+    if (!severity || severity === "unknown") {
         throw new Error("PackageScanner: invalid fail-on-vulnerability-severity. Use off, low, moderate, high, or critical.");
     }
     return severity;
@@ -119,7 +122,7 @@ export function countVulnerabilitiesAtOrAboveSeverity(vulnerabilities, threshold
     const thresholdIndex = VULNERABILITY_SEVERITY_ORDER.indexOf(threshold);
     return vulnerabilities.reduce((count, vulnerability) => {
         const severity = getVulnerabilitySeverity(vulnerability);
-        if (!severity) {
+        if (!severity || severity === "unknown") {
             return count;
         }
         return VULNERABILITY_SEVERITY_ORDER.indexOf(severity) >= thresholdIndex ? count + 1 : count;
@@ -127,6 +130,7 @@ export function countVulnerabilitiesAtOrAboveSeverity(vulnerabilities, threshold
 }
 export function countVulnerabilitiesBySeverity(vulnerabilities) {
     const counts = {
+        unknown: 0,
         low: 0,
         moderate: 0,
         high: 0,
@@ -153,6 +157,7 @@ export function writeGitHubStepSummary(summaryPath, { analysisId, malwareCount, 
         `| Packages scanned | ${totalPackages ?? "unknown"} |`,
         `| Malware findings | ${malwareCount} |`,
         `| Vulnerabilities | ${vulnerabilityCount} |`,
+        `| Unknown | ${vulnerabilitySeverityCounts.unknown} |`,
         `| Low | ${vulnerabilitySeverityCounts.low} |`,
         `| Moderate | ${vulnerabilitySeverityCounts.moderate} |`,
         `| High | ${vulnerabilitySeverityCounts.high} |`,
