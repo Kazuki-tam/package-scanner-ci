@@ -24,6 +24,7 @@ export function writeGitHubOutputs(outputPath, { analysisId, malwareCount, vulne
     appendFileSync(outputPath, `analysis-id=${toSafeGitHubOutputValue("analysis-id", analysisId)}\n`);
     appendFileSync(outputPath, `malware-count=${toSafeGitHubOutputValue("malware-count", malwareCount)}\n`);
     appendFileSync(outputPath, `vulnerability-count=${toSafeGitHubOutputValue("vulnerability-count", vulnerabilityCount)}\n`);
+    appendFileSync(outputPath, `vulnerability-unknown-count=${toSafeGitHubOutputValue("vulnerability-unknown-count", vulnerabilitySeverityCounts.unknown)}\n`);
     appendFileSync(outputPath, `vulnerability-low-count=${toSafeGitHubOutputValue("vulnerability-low-count", vulnerabilitySeverityCounts.low)}\n`);
     appendFileSync(outputPath, `vulnerability-moderate-count=${toSafeGitHubOutputValue("vulnerability-moderate-count", vulnerabilitySeverityCounts.moderate)}\n`);
     appendFileSync(outputPath, `vulnerability-high-count=${toSafeGitHubOutputValue("vulnerability-high-count", vulnerabilitySeverityCounts.high)}\n`);

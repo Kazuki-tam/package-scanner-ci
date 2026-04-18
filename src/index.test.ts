@@ -412,6 +412,7 @@ describe("package-scanner action helper", () => {
       { path: "/tmp/github-output.txt", value: "analysis-id=an_test123\n" },
       { path: "/tmp/github-output.txt", value: "malware-count=0\n" },
       { path: "/tmp/github-output.txt", value: "vulnerability-count=0\n" },
+      { path: "/tmp/github-output.txt", value: "vulnerability-unknown-count=0\n" },
       { path: "/tmp/github-output.txt", value: "vulnerability-low-count=0\n" },
       { path: "/tmp/github-output.txt", value: "vulnerability-moderate-count=0\n" },
       { path: "/tmp/github-output.txt", value: "vulnerability-high-count=0\n" },

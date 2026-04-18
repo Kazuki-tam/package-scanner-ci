@@ -57,6 +57,10 @@ export function writeGitHubOutputs(
   );
   appendFileSync(
     outputPath,
+    `vulnerability-unknown-count=${toSafeGitHubOutputValue("vulnerability-unknown-count", vulnerabilitySeverityCounts.unknown)}\n`,
+  );
+  appendFileSync(
+    outputPath,
     `vulnerability-low-count=${toSafeGitHubOutputValue("vulnerability-low-count", vulnerabilitySeverityCounts.low)}\n`,
   );
   appendFileSync(
