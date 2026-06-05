@@ -64,11 +64,13 @@ shk skills install --tool cursor --global
 Run `shk scan .` to detect secrets, API keys, and PII in the current directory. Scan also extracts text from `.docx`, `.xlsx`, `.pptx`, and text-layer `.pdf` files.
 
 Exit codes:
+
 - 0: no findings at or above threshold
 - 1: findings at or above threshold
 - 2: blocking AI hook triggered
 
 Useful flags:
+
 - `--fail-on <info|low|medium|high|critical>` — override threshold
 - `--verbose` — show informational skip findings
 - `--json` — machine-readable JSON report
@@ -80,6 +82,7 @@ Useful flags:
 - `--follow-symlinks` — follow symlinks during traversal
 
 Document notes:
+
 - Office findings are labelled with internal entries such as `report.docx:word/document.xml`.
 - PDF findings use the PDF path itself.
 - Image-only PDFs are not OCRed; no extractable text is reported as an informational skip finding.
@@ -105,6 +108,7 @@ shk mask report.docx --output report.redacted.docx
 Office document masking supports `.docx`, `.xlsx`, and `.pptx` and requires `--output`. PDF masking is not supported.
 
 Hook-mode masking:
+
 ```bash
 shk mask --hook-mode cursor < payload.json
 shk mask --hook-mode claude-code --post < response_payload.json
@@ -129,6 +133,7 @@ shk env dotenvx delete --all
 ```
 
 Important behavior:
+
 - Keys are stored in the OS credential store through the platform keychain/credential backend.
 - `run` injects keys only into the child `dotenvx run -- <command>` environment.
 - There is no raw-key export under `shk env dotenvx`; use `shk env key export --instructions` only for handoff guidance.
@@ -151,6 +156,7 @@ shk secrets push --profile prod --confirm
 ```
 
 Safe operating rules:
+
 - Prefer `--dry-run` first; it prints target metadata but not raw values.
 - Use `--mode per-key` for per-key writes. Do not document or suggest the hidden compatibility `--per-key` flag.
 - The command runs a pre-push PII scan unless `--no-scan` is explicitly passed.
@@ -184,6 +190,7 @@ shk hooks install-ai --tool cursor --fail-closed
 ```
 
 Important hook behavior:
+
 - Without `--tool`, installs managed hooks for Claude Code, Codex, and Cursor.
 - `--audit` makes installed hooks non-blocking and writes metadata-only entries to `.shk/audit.log`.
 - `--log-blocked` keeps installed hooks blocking and writes metadata-only blocked-event entries to `.shk/audit.log`; inspect them with `shk audit`.
@@ -209,6 +216,7 @@ The generated workflow runs `shk scan . --json --fail-on high` by default. Use a
 ## External data sources and MCP integration
 
 **Important limitations:**
+
 - `WebFetch` and MCP tool results flow directly into the model context — hooks can detect
   findings but cannot transform (mask) the response before it enters context.
 - `shk mask` is only effective when you control the data pipeline via the `Bash` tool.
@@ -365,6 +373,7 @@ reason = "Test fixture"
 ```
 
 Suppression and ignore methods agents should know:
+
 - Same-line suppression: `value # shk-ignore <rule_id>` or `value // shk-ignore <rule_id>`.
 - Next-line suppression: `# shk-ignore-next-line <rule_id>` or `// shk-ignore-next-line <rule_id>`.
 - Markdown-friendly suppression: `<!-- shk-ignore-next-line <rule_id> -->` before the line, or `value <!-- shk-ignore <rule_id> -->` on the same line.

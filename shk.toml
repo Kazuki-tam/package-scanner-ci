@@ -36,7 +36,7 @@ exclude = [
   "**/*.woff2",
   "**/*.ttf",
   "**/*.otf",
-  "**/*.eot"
+  "**/*.eot",
 ]
 max_file_size_bytes = 1048576
 binary_detection_bytes = 8192
@@ -88,7 +88,7 @@ required_patterns = [
   "*.key",
   "*.p12",
   "*.mobileprovision",
-  "*.log"
+  "*.log",
 ]
 
 # Allowlist / inline suppressions (spec §5.3). Prefer path-scoped rows; use value_hash only as an equality fingerprint.
