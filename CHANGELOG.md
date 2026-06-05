@@ -35,6 +35,18 @@ versioning for its public GitHub Action behavior.
   `https://www.package-scanner.dev`
 - sanitize API-derived values before writing them to `GITHUB_STEP_SUMMARY`
 
+## [1.0.2]
+
+Maintenance and developer-tooling release. The published GitHub Action behavior
+is unchanged.
+
+### Changed
+
+- adopt `shk` secret/PII scanning hooks for Claude Code, Codex, and Cursor, with
+  shared configuration in `shk.toml`
+- harden npm installs by setting `minimumReleaseAge` in `pnpm-workspace.yaml`
+- bump `vitest` and `@vitest/coverage-v8` to `4.1.8`
+
 ## [0.1.0]
 
 ### Added
