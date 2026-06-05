@@ -1,0 +1,37 @@
+# shk-managed-start
+[features]
+hooks = true
+
+
+[[hooks.PreToolUse]]
+matcher = ".*"
+timeout = 30
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = 'shk scan "$(git rev-parse --show-toplevel)" --hook-mode codex'
+statusMessage = "shk: scanning for secrets..."
+[[hooks.PermissionRequest]]
+matcher = ".*"
+timeout = 30
+
+[[hooks.PermissionRequest.hooks]]
+type = "command"
+command = 'shk scan "$(git rev-parse --show-toplevel)" --hook-mode codex'
+statusMessage = "shk: checking approval request..."
+[[hooks.UserPromptSubmit]]
+timeout = 30
+
+[[hooks.UserPromptSubmit.hooks]]
+type = "command"
+command = 'shk scan "$(git rev-parse --show-toplevel)" --hook-mode codex --fail-on medium'
+statusMessage = "shk: scanning submitted prompt..."
+[[hooks.PostToolUse]]
+matcher = ".*"
+timeout = 30
+
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = 'shk scan "$(git rev-parse --show-toplevel)" --hook-mode codex --post'
+statusMessage = "shk: scanning tool output..."
+# shk-managed-end
