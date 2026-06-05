@@ -337,7 +337,7 @@ describe("package-scanner action helper", () => {
   it("rejects API URLs with embedded credentials", () => {
     expect(() =>
       getApiUrl({
-        PACKAGE_SCANNER_API_BASE_URL: "https://user:pass@www.package-scanner.dev",
+        PACKAGE_SCANNER_API_BASE_URL: "https://user:pass@www.package-scanner.dev", // shk-ignore pii.email
       }),
     ).toThrow(/api-base-url must not include credentials/);
   });

@@ -1,0 +1,5 @@
+# shk-managed npm-hardening
+packages:
+  - "."
+# shk-managed npm-hardening
+minimumReleaseAge: 1440
