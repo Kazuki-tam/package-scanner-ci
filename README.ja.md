@@ -130,7 +130,7 @@ PR コメントに使う例:
 
 - リポジトリのファイルを参照できるように、この Action より先に `actions/checkout` を実行してください
 - self-hosted runner では `node` が `PATH` 上に存在する必要があります
-- ランタイムは組み込みの Fetch API に依存するため、Node `18.17+` を使用してください
+- ランタイムは組み込みの Fetch API に依存するため、Node `20.19+` を使用してください
 - `https://www.package-scanner.dev` への外向き HTTPS 通信を許可してください
 
 ## 公開契約

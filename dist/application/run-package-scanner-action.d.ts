@@ -1,19 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-export interface RunPackageScannerActionResult {
-    analysisId: string;
-    malware: unknown[];
-    malwareCount: number;
-    vulnerabilities: unknown[];
-    vulnerabilityCount: number;
-    vulnerabilitySeverityCounts: {
-        low: number;
-        moderate: number;
-        high: number;
-        critical: number;
-    };
-    totalPackages: number | null;
-}
+import { type ParsedCiAnalyzeResult } from "../infrastructure/index.js";
+export type RunPackageScannerActionResult = ParsedCiAnalyzeResult;
 export interface RunPackageScannerActionOptions {
     env?: NodeJS.ProcessEnv;
     cwd?: string;

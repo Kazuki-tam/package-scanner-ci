@@ -28,6 +28,8 @@ versioning for its public GitHub Action behavior.
   repository layout
 - removed the public `api-base-url` input and now always send analysis requests
   to the hosted PackageScanner endpoint at `https://www.package-scanner.dev`
+- raised the minimum supported Node.js version to `20.19` and upgraded the
+  development toolchain to Vite `8.2.0`
 
 ### Security
 
