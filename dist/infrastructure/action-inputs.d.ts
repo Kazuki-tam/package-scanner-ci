@@ -9,5 +9,5 @@ export interface ResolveLockfileInputResult {
 }
 export declare function resolveLockfileInput(dir: string, env: NodeJS.ProcessEnv, { existsSync, readFileSync, realpathSync, pathModule, }?: PathFsDeps): ResolveLockfileInputResult;
 export declare function resolvePackageJsonInput(dir: string, env: NodeJS.ProcessEnv, { existsSync, readFileSync, realpathSync, pathModule, }?: PathFsDeps): string | undefined;
-export declare function resolveWorkingDirectory(env: NodeJS.ProcessEnv, cwd: string, pathModule: typeof path): string;
+export declare function resolveWorkingDirectory(env: NodeJS.ProcessEnv, cwd: string, pathModule?: typeof path): string;
 //# sourceMappingURL=action-inputs.d.ts.map

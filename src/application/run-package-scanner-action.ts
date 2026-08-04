@@ -7,6 +7,7 @@ import {
   resolvePackageJsonInput,
   resolveWorkingDirectory,
   type CiAnalyzeSuccessResponse,
+  type ParsedCiAnalyzeResult,
   normalizeVulnerabilitySeverityThreshold,
   parseCiAnalyzeSuccessResponse,
   writeGitHubOutputs,
@@ -17,20 +18,7 @@ import {
   parseJsonResponseText,
 } from "../infrastructure/index.js";
 
-export interface RunPackageScannerActionResult {
-  analysisId: string;
-  malware: unknown[];
-  malwareCount: number;
-  vulnerabilities: unknown[];
-  vulnerabilityCount: number;
-  vulnerabilitySeverityCounts: {
-    low: number;
-    moderate: number;
-    high: number;
-    critical: number;
-  };
-  totalPackages: number | null;
-}
+export type RunPackageScannerActionResult = ParsedCiAnalyzeResult;
 
 export interface RunPackageScannerActionOptions {
   env?: NodeJS.ProcessEnv;
@@ -49,16 +37,22 @@ export async function runPackageScannerAction({
 }: RunPackageScannerActionOptions = {}): Promise<RunPackageScannerActionResult> {
   const workingDirectory = resolveWorkingDirectory(env, cwd, pathModule);
 
-  const { content: lockfileContent, manager } = resolveLockfileInput(workingDirectory, env, {
+  const readDeps = {
     existsSync: fsModule.existsSync,
     readFileSync: fsModule.readFileSync,
+    realpathSync: (filePath: fs.PathLike) =>
+      typeof fsModule.realpathSync.native === "function"
+        ? fsModule.realpathSync.native(filePath)
+        : fsModule.realpathSync(filePath),
     pathModule,
-  });
-  const packageJsonContent = resolvePackageJsonInput(workingDirectory, env, {
-    existsSync: fsModule.existsSync,
-    readFileSync: fsModule.readFileSync,
-    pathModule,
-  });
+  };
+
+  const { content: lockfileContent, manager } = resolveLockfileInput(
+    workingDirectory,
+    env,
+    readDeps,
+  );
+  const packageJsonContent = resolvePackageJsonInput(workingDirectory, env, readDeps);
   const requestBody = createRequestBody({
     lockfileContent,
     manager,
@@ -85,28 +79,19 @@ export async function runPackageScannerAction({
     env.PACKAGE_SCANNER_FAIL_ON_VULNERABILITY_SEVERITY,
   );
 
-  writeGitHubOutputs(
-    env.GITHUB_OUTPUT,
-    {
-      analysisId: parsed.analysisId,
-      malwareCount: parsed.malwareCount,
-      vulnerabilityCount: parsed.vulnerabilityCount,
-      vulnerabilitySeverityCounts: parsed.vulnerabilitySeverityCounts,
-    },
-    { appendFileSync: fsModule.appendFileSync },
-  );
+  const report = {
+    analysisId: parsed.analysisId,
+    malwareCount: parsed.malwareCount,
+    vulnerabilityCount: parsed.vulnerabilityCount,
+    vulnerabilitySeverityCounts: parsed.vulnerabilitySeverityCounts,
+  };
+  const writeDeps = { appendFileSync: fsModule.appendFileSync };
+
+  writeGitHubOutputs(env.GITHUB_OUTPUT, report, writeDeps);
   writeGitHubStepSummary(
     env.GITHUB_STEP_SUMMARY,
-    {
-      analysisId: parsed.analysisId,
-      malwareCount: parsed.malwareCount,
-      vulnerabilityCount: parsed.vulnerabilityCount,
-      vulnerabilitySeverityCounts: parsed.vulnerabilitySeverityCounts,
-      totalPackages: parsed.totalPackages,
-      failOnMalware,
-      vulnerabilityThreshold,
-    },
-    { appendFileSync: fsModule.appendFileSync },
+    { ...report, totalPackages: parsed.totalPackages, failOnMalware, vulnerabilityThreshold },
+    writeDeps,
   );
 
   if (failOnMalware && parsed.malwareCount > 0) {
@@ -123,13 +108,5 @@ export async function runPackageScannerAction({
     );
   }
 
-  return {
-    analysisId: parsed.analysisId,
-    malware: parsed.malware,
-    malwareCount: parsed.malwareCount,
-    vulnerabilities: parsed.vulnerabilities,
-    vulnerabilityCount: parsed.vulnerabilityCount,
-    vulnerabilitySeverityCounts: parsed.vulnerabilitySeverityCounts,
-    totalPackages: parsed.totalPackages,
-  };
+  return parsed;
 }

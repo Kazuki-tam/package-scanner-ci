@@ -4,7 +4,7 @@ Treat this file as the primary maintenance guide for the repository, and keep `C
 
 ## Dev environment tips
 
-- Use Node `18.17+`; CI currently runs on Node `20`, so prefer matching that locally when possible.
+- Use Node `20.19+`; CI runs on Node `20.19`, so prefer matching that locally when possible.
 - Enable Corepack before installing dependencies: `corepack enable`.
 - Install dependencies with `pnpm install`.
 - This repository commits `dist/` because GitHub Actions executes the compiled JavaScript directly; source changes under `src/` usually require regenerated `dist/`.

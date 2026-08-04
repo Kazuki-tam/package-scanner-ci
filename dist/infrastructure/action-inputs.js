@@ -82,7 +82,7 @@ export function resolvePackageJsonInput(dir, env, { existsSync = fs.existsSync, 
     });
     return readFileIfExists(absolutePath, { existsSync, readFileSync });
 }
-export function resolveWorkingDirectory(env, cwd, pathModule) {
+export function resolveWorkingDirectory(env, cwd, pathModule = path) {
     const workspace = env.GITHUB_WORKSPACE || cwd;
     const resolvedWorkspace = pathModule.resolve(workspace);
     return resolveWorkspaceScopedPath(resolvedWorkspace, env.PACKAGE_SCANNER_WORKING_DIRECTORY || ".", "working-directory", { pathModule });

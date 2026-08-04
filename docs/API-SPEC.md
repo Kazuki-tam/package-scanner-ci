@@ -71,7 +71,7 @@ Notes:
 ## 4. Runtime Requirements
 
 - `actions/checkout` must run before this Action
-- Node.js `18.17+` must be available on the runner
+- Node.js `20.19+` must be available on the runner
 - On self-hosted runners, `node` must be on `PATH`
 - The workflow must allow outbound HTTPS access to
   `https://www.package-scanner.dev`

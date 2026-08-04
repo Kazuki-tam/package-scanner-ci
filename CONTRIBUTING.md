@@ -6,7 +6,7 @@ Thanks for contributing to the PackageScanner GitHub Action.
 
 Requirements:
 
-- Node `18.17+`
+- Node `20.19+`
 - `pnpm` via Corepack or a local install
 
 Setup:

@@ -21,14 +21,18 @@ export function writeGitHubOutputs(outputPath, { analysisId, malwareCount, vulne
     if (!outputPath) {
         return;
     }
-    appendFileSync(outputPath, `analysis-id=${toSafeGitHubOutputValue("analysis-id", analysisId)}\n`);
-    appendFileSync(outputPath, `malware-count=${toSafeGitHubOutputValue("malware-count", malwareCount)}\n`);
-    appendFileSync(outputPath, `vulnerability-count=${toSafeGitHubOutputValue("vulnerability-count", vulnerabilityCount)}\n`);
-    appendFileSync(outputPath, `vulnerability-unknown-count=${toSafeGitHubOutputValue("vulnerability-unknown-count", vulnerabilitySeverityCounts.unknown)}\n`);
-    appendFileSync(outputPath, `vulnerability-low-count=${toSafeGitHubOutputValue("vulnerability-low-count", vulnerabilitySeverityCounts.low)}\n`);
-    appendFileSync(outputPath, `vulnerability-moderate-count=${toSafeGitHubOutputValue("vulnerability-moderate-count", vulnerabilitySeverityCounts.moderate)}\n`);
-    appendFileSync(outputPath, `vulnerability-high-count=${toSafeGitHubOutputValue("vulnerability-high-count", vulnerabilitySeverityCounts.high)}\n`);
-    appendFileSync(outputPath, `vulnerability-critical-count=${toSafeGitHubOutputValue("vulnerability-critical-count", vulnerabilitySeverityCounts.critical)}\n`);
+    const entries = [
+        ["analysis-id", analysisId],
+        ["malware-count", malwareCount],
+        ["vulnerability-count", vulnerabilityCount],
+        ...["unknown", ...VULNERABILITY_SEVERITY_ORDER].map((severity) => [
+            `vulnerability-${severity}-count`,
+            vulnerabilitySeverityCounts[severity],
+        ]),
+    ];
+    for (const [name, value] of entries) {
+        appendFileSync(outputPath, `${name}=${toSafeGitHubOutputValue(name, value)}\n`);
+    }
 }
 function asRecord(value) {
     return typeof value === "object" && value !== null ? value : null;
@@ -119,14 +123,9 @@ export function countVulnerabilitiesAtOrAboveSeverity(vulnerabilities, threshold
     if (threshold === "off") {
         return 0;
     }
+    const counts = countVulnerabilitiesBySeverity(vulnerabilities);
     const thresholdIndex = VULNERABILITY_SEVERITY_ORDER.indexOf(threshold);
-    return vulnerabilities.reduce((count, vulnerability) => {
-        const severity = getVulnerabilitySeverity(vulnerability);
-        if (!severity || severity === "unknown") {
-            return count;
-        }
-        return VULNERABILITY_SEVERITY_ORDER.indexOf(severity) >= thresholdIndex ? count + 1 : count;
-    }, 0);
+    return VULNERABILITY_SEVERITY_ORDER.slice(thresholdIndex).reduce((count, severity) => count + counts[severity], 0);
 }
 export function countVulnerabilitiesBySeverity(vulnerabilities) {
     const counts = {

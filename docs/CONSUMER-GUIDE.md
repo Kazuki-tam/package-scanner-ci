@@ -30,7 +30,7 @@ Supported lockfiles:
 Make sure your workflow environment can satisfy the following:
 
 - `actions/checkout` runs before this Action
-- the runner has Node.js `18.17+`
+- the runner has Node.js `20.19+`
 - the runner can reach `https://www.package-scanner.dev` over HTTPS
 
 For most GitHub-hosted runners, no extra setup is required beyond checkout.

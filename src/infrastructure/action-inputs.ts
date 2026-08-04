@@ -153,7 +153,7 @@ export function resolvePackageJsonInput(
 export function resolveWorkingDirectory(
   env: NodeJS.ProcessEnv,
   cwd: string,
-  pathModule: typeof path,
+  pathModule: typeof path = path,
 ): string {
   const workspace = env.GITHUB_WORKSPACE || cwd;
   const resolvedWorkspace = pathModule.resolve(workspace);

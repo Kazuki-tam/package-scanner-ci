@@ -141,7 +141,7 @@ the workspace are rejected.
 
 - run `actions/checkout` before this action so repository files are available
 - ensure `node` is available on `PATH` on self-hosted runners
-- use Node `18.17+` because the runtime relies on the built-in Fetch API
+- use Node `20.19+` because the runtime relies on the built-in Fetch API
 - allow outbound HTTPS access to `https://www.package-scanner.dev`
 
 ## Public Contract

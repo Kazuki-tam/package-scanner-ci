@@ -28,7 +28,7 @@
 ワークフロー環境が次の条件を満たしていることを確認してください。
 
 - この Action より先に `actions/checkout` が実行される
-- runner に Node.js `18.17+` が入っている
+- runner に Node.js `20.19+` が入っている
 - runner が `https://www.package-scanner.dev` へ HTTPS で接続できる
 
 通常の GitHub-hosted runner であれば、checkout 以外に特別な準備はほぼ不要です。

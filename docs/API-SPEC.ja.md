@@ -63,7 +63,7 @@
 ## 4. 実行要件
 
 - この Action の前に `actions/checkout` を実行していること
-- runner 上で Node.js `18.17+` が利用可能であること
+- runner 上で Node.js `20.19+` が利用可能であること
 - self-hosted runner では `node` が `PATH` にあること
 - workflow から `https://www.package-scanner.dev` へ外向き HTTPS 通信ができること
 
