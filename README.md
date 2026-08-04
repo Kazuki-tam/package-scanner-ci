@@ -34,7 +34,7 @@ jobs:
   package-scanner:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1
