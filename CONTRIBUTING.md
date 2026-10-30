@@ -42,4 +42,5 @@ make sure the generated `dist/` output stays in sync.
 - run `pnpm run check`
 - run `pnpm run build`
 - review `dist/` changes for expected output only
-- update `CHANGELOG.md` when the public contract changes
+- add an entry under `[Unreleased]` in `CHANGELOG.md` when the public contract
+  changes; maintainers move it into a versioned section at release time
