@@ -1,5 +1,7 @@
+import { normalizePackageManager } from "../domain/lockfile.js";
 import { getTrimmedEnv } from "./action-inputs.js";
 export const DEFAULT_API_BASE_URL = "https://www.package-scanner.dev";
+export const ANALYZE_REQUEST_TIMEOUT_MS = 120_000;
 function normalizeApiBaseUrl(baseUrl) {
     let url;
     try {
@@ -16,11 +18,24 @@ function normalizeApiBaseUrl(baseUrl) {
     }
     return url.toString().replace(/\/+$/, "");
 }
+function toRequestError(error, timeoutMs) {
+    if (!(error instanceof Error)) {
+        return new Error("PackageScanner: request failed before a response was received.");
+    }
+    if (error.name === "TimeoutError" || error.name === "AbortError") {
+        return new Error(`PackageScanner: request timed out after ${timeoutMs}ms.`);
+    }
+    if (error instanceof TypeError) {
+        return new Error("PackageScanner: request failed before a response was received.");
+    }
+    return undefined;
+}
 export function createRequestBody({ lockfileContent, manager, packageJsonContent, enableMetadataCheck = false, }) {
     if (!lockfileContent && !packageJsonContent) {
         throw new Error("PackageScanner: no lockfile or package.json found. Commit a lockfile or package.json, or set inputs.");
     }
-    if (lockfileContent && !manager) {
+    const normalizedManager = normalizePackageManager(manager);
+    if (lockfileContent && !normalizedManager) {
         throw new Error("PackageScanner: could not determine package manager. Set package-manager input (npm, pnpm, yarn, or bun).");
     }
     if (enableMetadataCheck && !packageJsonContent) {
@@ -29,7 +44,7 @@ export function createRequestBody({ lockfileContent, manager, packageJsonContent
     const body = {};
     if (lockfileContent) {
         body.lockfileContent = lockfileContent;
-        body.manager = manager;
+        body.manager = normalizedManager;
     }
     if (packageJsonContent) {
         body.packageJsonContent = packageJsonContent;
@@ -46,6 +61,23 @@ export function getApiUrl(env) {
         throw new Error(`PackageScanner: api-base-url must be ${DEFAULT_API_BASE_URL}.`);
     }
     return `${DEFAULT_API_BASE_URL}/api/ci/analyze`;
+}
+export async function postAnalyzeRequest(fetchImpl, url, body, timeoutMs = ANALYZE_REQUEST_TIMEOUT_MS) {
+    try {
+        return await fetchImpl(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify(body),
+            signal: AbortSignal.timeout(timeoutMs),
+        });
+    }
+    catch (error) {
+        const requestError = toRequestError(error, timeoutMs);
+        if (requestError) {
+            throw requestError;
+        }
+        throw error;
+    }
 }
 export function parseJsonResponseText(text) {
     try {

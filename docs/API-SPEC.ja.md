@@ -139,7 +139,9 @@ Accept: application/json
 送信前に Action が強制する検証ルール:
 
 - `lockfileContent` または `packageJsonContent` のどちらか少なくとも 1 つが必要です
-- ロックファイルを送る場合、package manager が判明している必要があります
+- ロックファイルを送る場合、package manager が判明している必要があります。
+  `package-manager` は大文字小文字を区別せず、`npm`、`pnpm`、`yarn`、`bun` のいずれかである必要があります。
+- Action は解析リクエストを 120 秒で中断します。
 - これとは別にサーバ側の検証が行われる可能性があります
 
 脆弱性の失敗しきい値:
@@ -173,6 +175,9 @@ Accept: application/json
 - 対応ロックファイルも `package.json` も存在しない
 - API が JSON または非 JSON の body を伴う非成功ステータスを返した
 - HTTP レスポンスが成功扱いでも JSON として不正だった
+- 成功レスポンスが JSON オブジェクトではない、または `malware` / `vulnerabilities` が存在するのに配列ではない
+- `package-manager` が `npm`、`pnpm`、`yarn`、`bun` 以外に設定されている
+- 解析リクエストが 120 秒のタイムアウトを超えた、またはレスポンスを受け取る前に失敗した
 - `fail-on-vulnerability-severity` 以上の脆弱性が返された
 - マルウェアが検出され、かつ `fail-on-malware` が `"false"` ではない
 
@@ -186,6 +191,10 @@ Accept: application/json
 - `PackageScanner: request failed (500) with JSON response.`
 - `PackageScanner: request failed (502) with non-JSON response.`
 - `PackageScanner: response was not valid JSON.`
+- `PackageScanner: response JSON must be an object.`
+- `PackageScanner: package-manager must be npm, pnpm, yarn, or bun.`
+- `PackageScanner: request timed out after 120000ms.`
+- `PackageScanner: request failed before a response was received.`
 - `PackageScanner: blocking vulnerabilities detected at or above high: 1`
 - `PackageScanner: malicious packages detected: 1`
 
@@ -211,7 +220,7 @@ Action における利用方法:
 
 - `analysisId` -> `analysis-id`
 - `malware.length` -> `malware-count`
-- `summary.vulnerabilityCount` または `vulnerabilities.length` -> `vulnerability-count`
+- `summary.vulnerabilityCount` が 0 以上の整数である場合はその値、それ以外は `vulnerabilities.length` -> `vulnerability-count`
 - 正規化済みの重大度バケット -> `vulnerability-unknown-count`、`vulnerability-low-count`、`vulnerability-moderate-count`、`vulnerability-high-count`、`vulnerability-critical-count`
 - `summary.total` -> コンソール要約のみに利用し、正式な Action output には含めない
 
@@ -227,7 +236,9 @@ jobs:
   package-scanner:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1
@@ -237,13 +248,21 @@ jobs:
           fail-on-vulnerability-severity: "high"
           enable-metadata-check: "false"
 
-      - run: |
-          echo "analysis=${{ steps.scan.outputs.analysis-id }}"
-          echo "unknown=${{ steps.scan.outputs.vulnerability-unknown-count }}"
-          echo "low=${{ steps.scan.outputs.vulnerability-low-count }}"
-          echo "moderate=${{ steps.scan.outputs.vulnerability-moderate-count }}"
-          echo "high=${{ steps.scan.outputs.vulnerability-high-count }}"
-          echo "critical=${{ steps.scan.outputs.vulnerability-critical-count }}"
+      - name: Print scan summary
+        env:
+          ANALYSIS_ID: ${{ steps.scan.outputs.analysis-id }}
+          VULNERABILITY_UNKNOWN_COUNT: ${{ steps.scan.outputs.vulnerability-unknown-count }}
+          VULNERABILITY_LOW_COUNT: ${{ steps.scan.outputs.vulnerability-low-count }}
+          VULNERABILITY_MODERATE_COUNT: ${{ steps.scan.outputs.vulnerability-moderate-count }}
+          VULNERABILITY_HIGH_COUNT: ${{ steps.scan.outputs.vulnerability-high-count }}
+          VULNERABILITY_CRITICAL_COUNT: ${{ steps.scan.outputs.vulnerability-critical-count }}
+        run: |
+          echo "analysis=${ANALYSIS_ID}"
+          echo "unknown=${VULNERABILITY_UNKNOWN_COUNT}"
+          echo "low=${VULNERABILITY_LOW_COUNT}"
+          echo "moderate=${VULNERABILITY_MODERATE_COUNT}"
+          echo "high=${VULNERABILITY_HIGH_COUNT}"
+          echo "critical=${VULNERABILITY_CRITICAL_COUNT}"
 ```
 
 ## 12. 互換性とバージョニング

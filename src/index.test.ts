@@ -8,6 +8,7 @@ import {
   countVulnerabilitiesAtOrAboveSeverity,
   countVulnerabilitiesBySeverity,
   createRequestBody,
+  formatAnalysisSuccessLog,
   getVulnerabilitySeverity,
   getApiUrl,
   normalizeVulnerabilitySeverityThreshold,
@@ -361,6 +362,7 @@ describe("package-scanner action helper", () => {
       const url = typeof input === "string" || input instanceof URL ? input : input.url;
       expect(url).toBe("https://www.package-scanner.dev/api/ci/analyze");
       expect(init.method).toBe("POST");
+      expect(init.signal).toBeInstanceOf(AbortSignal);
       expect(init.body).toBe(
         JSON.stringify({
           lockfileContent: "lockfile",
@@ -797,5 +799,162 @@ describe("package-scanner action helper", () => {
         pathModule: path,
       }),
     ).rejects.toThrow(/PackageScanner: request failed \(500\) with JSON response\./);
+  });
+
+  it("rejects an unsupported package manager before calling the API", async () => {
+    const workspace = "/workspace";
+    const fsModule = createFakeFs({
+      [path.join(workspace, "package.json")]: '{"name":"demo"}',
+    });
+
+    await expect(
+      runPackageScannerAction({
+        env: {
+          GITHUB_WORKSPACE: workspace,
+          PACKAGE_SCANNER_PACKAGE_MANAGER: "pip",
+        },
+        cwd: workspace,
+        fetchImpl: async () => new Response("{}", { status: 200 }),
+        fsModule: asFsModule(fsModule),
+        pathModule: path,
+      }),
+    ).rejects.toThrow(/package-manager must be npm, pnpm, yarn, or bun/);
+  });
+
+  it("normalizes a package manager override before sending the lockfile", async () => {
+    const workspace = "/workspace";
+    const fsModule = createFakeFs({
+      [path.join(workspace, "custom.lock")]: "lockfile",
+    });
+
+    await runPackageScannerAction({
+      env: {
+        GITHUB_WORKSPACE: workspace,
+        PACKAGE_SCANNER_LOCKFILE: "custom.lock",
+        PACKAGE_SCANNER_PACKAGE_MANAGER: "PNPM",
+        PACKAGE_SCANNER_FAIL_ON_MALWARE: "false",
+        PACKAGE_SCANNER_FAIL_ON_VULNERABILITY_SEVERITY: "off",
+      },
+      cwd: workspace,
+      fetchImpl: async (_input, init: RequestInit = {}) => {
+        expect(init.body).toBe(
+          JSON.stringify({
+            lockfileContent: "lockfile",
+            manager: "pnpm",
+          }),
+        );
+        return new Response(
+          JSON.stringify({
+            analysisId: "an_manager",
+            malware: [],
+            vulnerabilities: [],
+            summary: { total: 1, vulnerabilityCount: 0 },
+          }),
+          { status: 200 },
+        );
+      },
+      fsModule: asFsModule(fsModule),
+      pathModule: path,
+    });
+  });
+
+  it("reports request timeouts without leaking the transport error", async () => {
+    const workspace = "/workspace";
+    const fsModule = createFakeFs({
+      [path.join(workspace, "package.json")]: '{"name":"demo"}',
+    });
+    const timeoutError = new Error("The operation was aborted due to timeout");
+    timeoutError.name = "TimeoutError";
+
+    await expect(
+      runPackageScannerAction({
+        env: { GITHUB_WORKSPACE: workspace },
+        cwd: workspace,
+        requestTimeoutMs: 5,
+        fetchImpl: async () => {
+          throw timeoutError;
+        },
+        fsModule: asFsModule(fsModule),
+        pathModule: path,
+      }),
+    ).rejects.toThrow(/request timed out after 5ms/);
+  });
+
+  it("wraps network failures before a response is received", async () => {
+    const workspace = "/workspace";
+    const fsModule = createFakeFs({
+      [path.join(workspace, "package.json")]: '{"name":"demo"}',
+    });
+
+    await expect(
+      runPackageScannerAction({
+        env: { GITHUB_WORKSPACE: workspace },
+        cwd: workspace,
+        fetchImpl: async () => {
+          throw new TypeError("fetch failed");
+        },
+        fsModule: asFsModule(fsModule),
+        pathModule: path,
+      }),
+    ).rejects.toThrow(/request failed before a response was received/);
+  });
+
+  it("rejects a successful response that is not a JSON object", async () => {
+    const workspace = "/workspace";
+    const fsModule = createFakeFs({
+      [path.join(workspace, "package.json")]: '{"name":"demo"}',
+    });
+
+    await expect(
+      runPackageScannerAction({
+        env: { GITHUB_WORKSPACE: workspace },
+        cwd: workspace,
+        fetchImpl: async () => new Response("[]", { status: 200 }),
+        fsModule: asFsModule(fsModule),
+        pathModule: path,
+      }),
+    ).rejects.toThrow(/response JSON must be an object/);
+  });
+
+  it("rejects a success payload whose finding lists are not arrays", async () => {
+    const workspace = "/workspace";
+    const fsModule = createFakeFs({
+      [path.join(workspace, "package.json")]: '{"name":"demo"}',
+    });
+
+    await expect(
+      runPackageScannerAction({
+        env: { GITHUB_WORKSPACE: workspace },
+        cwd: workspace,
+        fetchImpl: async () =>
+          new Response(JSON.stringify({ analysisId: "an_bad", malware: {} }), { status: 200 }),
+        fsModule: asFsModule(fsModule),
+        pathModule: path,
+      }),
+    ).rejects.toThrow(/response field malware must be an array/);
+  });
+
+  it("falls back when summary counts are not safe integers", () => {
+    expect(
+      parseCiAnalyzeSuccessResponse({
+        analysisId: "an_counts",
+        malware: [],
+        vulnerabilities: [{ severity: "low" }],
+        summary: { total: -1, vulnerabilityCount: 1.5 },
+      }),
+    ).toMatchObject({
+      vulnerabilityCount: 1,
+      totalPackages: null,
+    });
+  });
+
+  it("strips control characters from the success log line", () => {
+    expect(
+      formatAnalysisSuccessLog({
+        analysisId: "an_ok\n::error::injected",
+        totalPackages: null,
+        malwareCount: 0,
+      }),
+    ).toBe("PackageScanner: analysis an_ok ::error::injected, packages ?, malware 0");
   });
 });

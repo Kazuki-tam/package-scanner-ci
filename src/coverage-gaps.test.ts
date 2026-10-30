@@ -10,9 +10,11 @@ import {
   createRequestFailedMessage,
   detectLockfile,
   getApiUrl,
+  postAnalyzeRequest,
   getTrimmedEnv,
   getVulnerabilitySeverity,
   inferManagerFromFilename,
+  normalizePackageManager,
   parseCiAnalyzeSuccessResponse,
   readFileIfExists,
   resolveLockfileInput,
@@ -43,6 +45,15 @@ describe("domain lockfile helpers", () => {
 
   it("returns an empty manager for unknown lockfile names", () => {
     expect(inferManagerFromFilename("unknown.lock")).toBe("");
+  });
+
+  it("normalizes package manager names and rejects unknown values", () => {
+    expect(normalizePackageManager(" Yarn ")).toBe("yarn");
+    expect(normalizePackageManager("")).toBeUndefined();
+    expect(normalizePackageManager(undefined)).toBeUndefined();
+    expect(() => normalizePackageManager("pip")).toThrow(
+      /package-manager must be npm, pnpm, yarn, or bun/,
+    );
   });
 
   it("matches lockfile basenames case-insensitively", () => {
@@ -150,6 +161,40 @@ describe("ci-api helpers", () => {
     expect(getApiUrl({})).toBe(`${DEFAULT_API_BASE_URL}/api/ci/analyze`);
   });
 
+  it("rejects an API base URL that is not a URL", () => {
+    expect(() =>
+      getApiUrl({
+        PACKAGE_SCANNER_API_BASE_URL: "not a url",
+      }),
+    ).toThrow(/api-base-url must be a valid HTTPS URL/);
+  });
+
+  it("wraps non-error transport failures and rethrows unexpected errors", async () => {
+    await expect(
+      postAnalyzeRequest(async () => Promise.reject("offline"), "https://example.invalid", {}),
+    ).rejects.toThrow(/request failed before a response was received/);
+
+    const abortError = new Error("aborted");
+    abortError.name = "AbortError";
+    await expect(
+      postAnalyzeRequest(async () => Promise.reject(abortError), "https://example.invalid", {}),
+    ).rejects.toThrow(/request timed out after/);
+
+    await expect(
+      postAnalyzeRequest(
+        async () => Promise.reject(new Error("assertion failed")),
+        "https://example.invalid",
+        {},
+      ),
+    ).rejects.toThrow(/assertion failed/);
+  });
+
+  it("rejects a summary field that is not an object", () => {
+    expect(() => parseCiAnalyzeSuccessResponse({ summary: [] })).toThrow(
+      /response field summary must be an object/,
+    );
+  });
+
   it("labels JSON and non-JSON error bodies without echoing secrets", () => {
     expect(createRequestFailedMessage(500, '{"ok":true}')).toMatch(/JSON response/);
     expect(createRequestFailedMessage(500, "not json")).toMatch(/non-JSON response/);
@@ -157,6 +202,15 @@ describe("ci-api helpers", () => {
 });
 
 describe("action outputs edge cases", () => {
+  it("treats omitted finding lists as empty arrays", () => {
+    expect(parseCiAnalyzeSuccessResponse({ analysisId: "an_empty" })).toMatchObject({
+      malware: [],
+      vulnerabilities: [],
+      vulnerabilityCount: 0,
+      totalPackages: null,
+    });
+  });
+
   it("parses responses without an analysis id", () => {
     const parsed = parseCiAnalyzeSuccessResponse({
       malware: [],

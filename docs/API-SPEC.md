@@ -154,7 +154,10 @@ Behavior:
 Validation rules enforced by the Action before sending:
 
 - At least one of `lockfileContent` or `packageJsonContent` must exist
-- If a lockfile is sent, the package manager must be known
+- If a lockfile is sent, the package manager must be known.
+  `package-manager` is matched case-insensitively and must be `npm`, `pnpm`,
+  `yarn`, or `bun`.
+- The Action aborts the analysis request after 120 seconds.
   Additional server-side validation may still apply.
 
 Vulnerability failure threshold:
@@ -190,6 +193,11 @@ The Action fails in the following situations:
 - neither a supported lockfile nor `package.json` is available
 - the API returns a non-success status with either a JSON or non-JSON body
 - the HTTP response is not valid JSON on an otherwise successful response
+- a successful response is not a JSON object, or `malware` / `vulnerabilities`
+  are present but are not arrays
+- `package-manager` is set to a value other than `npm`, `pnpm`, `yarn`, or `bun`
+- the analysis request exceeds the 120 second timeout or fails before a
+  response is received
 - a vulnerability is returned at or above `fail-on-vulnerability-severity`
 - malware is detected and `fail-on-malware` is not set to `"false"`
 
@@ -203,6 +211,10 @@ Representative error messages:
 - `PackageScanner: request failed (500) with JSON response.`
 - `PackageScanner: request failed (502) with non-JSON response.`
 - `PackageScanner: response was not valid JSON.`
+- `PackageScanner: response JSON must be an object.`
+- `PackageScanner: package-manager must be npm, pnpm, yarn, or bun.`
+- `PackageScanner: request timed out after 120000ms.`
+- `PackageScanner: request failed before a response was received.`
 - `PackageScanner: blocking vulnerabilities detected at or above high: 1`
 - `PackageScanner: malicious packages detected: 1`
 
@@ -229,8 +241,8 @@ The Action uses these values as follows:
 
 - `analysisId` -> `analysis-id`
 - `malware.length` -> `malware-count`
-- `summary.vulnerabilityCount` or `vulnerabilities.length` ->
-  `vulnerability-count`
+- `summary.vulnerabilityCount` when it is a non-negative integer, otherwise
+  `vulnerabilities.length` -> `vulnerability-count`
 - normalized severity buckets -> `vulnerability-unknown-count`,
   `vulnerability-low-count`, `vulnerability-moderate-count`,
   `vulnerability-high-count`, `vulnerability-critical-count`
@@ -249,7 +261,9 @@ jobs:
   package-scanner:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1
@@ -259,13 +273,21 @@ jobs:
           fail-on-vulnerability-severity: "high"
           enable-metadata-check: "false"
 
-      - run: |
-          echo "analysis=${{ steps.scan.outputs.analysis-id }}"
-          echo "unknown=${{ steps.scan.outputs.vulnerability-unknown-count }}"
-          echo "low=${{ steps.scan.outputs.vulnerability-low-count }}"
-          echo "moderate=${{ steps.scan.outputs.vulnerability-moderate-count }}"
-          echo "high=${{ steps.scan.outputs.vulnerability-high-count }}"
-          echo "critical=${{ steps.scan.outputs.vulnerability-critical-count }}"
+      - name: Print scan summary
+        env:
+          ANALYSIS_ID: ${{ steps.scan.outputs.analysis-id }}
+          VULNERABILITY_UNKNOWN_COUNT: ${{ steps.scan.outputs.vulnerability-unknown-count }}
+          VULNERABILITY_LOW_COUNT: ${{ steps.scan.outputs.vulnerability-low-count }}
+          VULNERABILITY_MODERATE_COUNT: ${{ steps.scan.outputs.vulnerability-moderate-count }}
+          VULNERABILITY_HIGH_COUNT: ${{ steps.scan.outputs.vulnerability-high-count }}
+          VULNERABILITY_CRITICAL_COUNT: ${{ steps.scan.outputs.vulnerability-critical-count }}
+        run: |
+          echo "analysis=${ANALYSIS_ID}"
+          echo "unknown=${VULNERABILITY_UNKNOWN_COUNT}"
+          echo "low=${VULNERABILITY_LOW_COUNT}"
+          echo "moderate=${VULNERABILITY_MODERATE_COUNT}"
+          echo "high=${VULNERABILITY_HIGH_COUNT}"
+          echo "critical=${VULNERABILITY_CRITICAL_COUNT}"
 ```
 
 ## 12. Compatibility and Versioning

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { countVulnerabilitiesAtOrAboveSeverity, resolveLockfileInput, resolvePackageJsonInput, resolveWorkingDirectory, normalizeVulnerabilitySeverityThreshold, parseCiAnalyzeSuccessResponse, writeGitHubOutputs, writeGitHubStepSummary, createRequestFailedMessage, createRequestBody, getApiUrl, parseJsonResponseText, } from "../infrastructure/index.js";
-export async function runPackageScannerAction({ env = process.env, cwd = process.cwd(), fetchImpl = fetch, fsModule = fs, pathModule = path, } = {}) {
+import { countVulnerabilitiesAtOrAboveSeverity, resolveLockfileInput, resolvePackageJsonInput, resolveWorkingDirectory, normalizeVulnerabilitySeverityThreshold, parseCiAnalyzeSuccessResponse, writeGitHubOutputs, writeGitHubStepSummary, createRequestFailedMessage, createRequestBody, getApiUrl, parseJsonResponseText, postAnalyzeRequest, } from "../infrastructure/index.js";
+export async function runPackageScannerAction({ env = process.env, cwd = process.cwd(), fetchImpl = fetch, fsModule = fs, pathModule = path, requestTimeoutMs, } = {}) {
     const workingDirectory = resolveWorkingDirectory(env, cwd, pathModule);
     const readDeps = {
         existsSync: fsModule.existsSync,
@@ -19,17 +19,12 @@ export async function runPackageScannerAction({ env = process.env, cwd = process
         packageJsonContent,
         enableMetadataCheck: env.PACKAGE_SCANNER_ENABLE_METADATA_CHECK === "true",
     });
-    const response = await fetchImpl(getApiUrl(env), {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(requestBody),
-    });
+    const response = await postAnalyzeRequest(fetchImpl, getApiUrl(env), requestBody, requestTimeoutMs);
     const responseText = await response.text();
     if (!response.ok) {
         throw new Error(createRequestFailedMessage(response.status, responseText));
     }
-    const result = parseJsonResponseText(responseText);
-    const parsed = parseCiAnalyzeSuccessResponse(result);
+    const parsed = parseCiAnalyzeSuccessResponse(parseJsonResponseText(responseText));
     const failOnMalware = env.PACKAGE_SCANNER_FAIL_ON_MALWARE !== "false";
     const vulnerabilityThreshold = normalizeVulnerabilitySeverityThreshold(env.PACKAGE_SCANNER_FAIL_ON_VULNERABILITY_SEVERITY);
     const report = {

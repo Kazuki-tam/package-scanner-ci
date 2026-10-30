@@ -1,6 +1,8 @@
+import { normalizePackageManager, type PackageManager } from "../domain/lockfile.js";
 import { getTrimmedEnv } from "./action-inputs.js";
 
 export const DEFAULT_API_BASE_URL = "https://www.package-scanner.dev";
+export const ANALYZE_REQUEST_TIMEOUT_MS = 120_000;
 
 function normalizeApiBaseUrl(baseUrl: string): string {
   let url: URL;
@@ -29,6 +31,22 @@ export interface CreateRequestBodyInput {
   enableMetadataCheck?: boolean;
 }
 
+function toRequestError(error: unknown, timeoutMs: number): Error | undefined {
+  if (!(error instanceof Error)) {
+    return new Error("PackageScanner: request failed before a response was received.");
+  }
+
+  if (error.name === "TimeoutError" || error.name === "AbortError") {
+    return new Error(`PackageScanner: request timed out after ${timeoutMs}ms.`);
+  }
+
+  if (error instanceof TypeError) {
+    return new Error("PackageScanner: request failed before a response was received.");
+  }
+
+  return undefined;
+}
+
 export function createRequestBody({
   lockfileContent,
   manager,
@@ -41,7 +59,9 @@ export function createRequestBody({
     );
   }
 
-  if (lockfileContent && !manager) {
+  const normalizedManager: PackageManager | undefined = normalizePackageManager(manager);
+
+  if (lockfileContent && !normalizedManager) {
     throw new Error(
       "PackageScanner: could not determine package manager. Set package-manager input (npm, pnpm, yarn, or bun).",
     );
@@ -57,7 +77,7 @@ export function createRequestBody({
 
   if (lockfileContent) {
     body.lockfileContent = lockfileContent;
-    body.manager = manager;
+    body.manager = normalizedManager;
   }
 
   if (packageJsonContent) {
@@ -80,6 +100,30 @@ export function getApiUrl(env: NodeJS.ProcessEnv): string {
   }
 
   return `${DEFAULT_API_BASE_URL}/api/ci/analyze`;
+}
+
+export async function postAnalyzeRequest(
+  fetchImpl: typeof fetch,
+  url: string,
+  body: unknown,
+  timeoutMs = ANALYZE_REQUEST_TIMEOUT_MS,
+): Promise<Response> {
+  try {
+    return await fetchImpl(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (error) {
+    const requestError = toRequestError(error, timeoutMs);
+
+    if (requestError) {
+      throw requestError;
+    }
+
+    throw error;
+  }
 }
 
 export function parseJsonResponseText(text: string): unknown {

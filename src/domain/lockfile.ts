@@ -5,6 +5,27 @@ import type { PathFsDeps } from "../support/fs-deps.js";
 
 export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
 
+const PACKAGE_MANAGERS = [
+  "npm",
+  "pnpm",
+  "yarn",
+  "bun",
+] as const satisfies readonly PackageManager[];
+
+export function normalizePackageManager(value: string | undefined): PackageManager | undefined {
+  const normalized = (value ?? "").trim().toLowerCase();
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  if ((PACKAGE_MANAGERS as readonly string[]).includes(normalized)) {
+    return normalized as PackageManager;
+  }
+
+  throw new Error("PackageScanner: package-manager must be npm, pnpm, yarn, or bun.");
+}
+
 /**
  * Single source of truth: lockfile basename → manager, and auto-detect order
  * (first existing file in this order wins).

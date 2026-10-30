@@ -1,6 +1,7 @@
 /**
  * CI helper entrypoint for the GitHub Action.
  */
+import { formatAnalysisSuccessLog } from "../application/format-success-log.js";
 import { runPackageScannerAction } from "../application/run-package-scanner-action.js";
 function writeStdout(message) {
     process.stdout.write(`${message}\n`);
@@ -10,7 +11,7 @@ function writeStderr(message) {
 }
 try {
     const result = await runPackageScannerAction();
-    writeStdout(`PackageScanner: analysis ${result.analysisId}, packages ${result.totalPackages ?? "?"}, malware ${result.malwareCount}`);
+    writeStdout(formatAnalysisSuccessLog(result));
 }
 catch (error) {
     const message = error instanceof Error ? error.message : "PackageScanner: unknown action error";

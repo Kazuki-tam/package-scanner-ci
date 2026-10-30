@@ -8,6 +8,7 @@ export interface RunPackageScannerActionOptions {
     fetchImpl?: typeof fetch;
     fsModule?: typeof fs;
     pathModule?: typeof path;
+    requestTimeoutMs?: number;
 }
-export declare function runPackageScannerAction({ env, cwd, fetchImpl, fsModule, pathModule, }?: RunPackageScannerActionOptions): Promise<RunPackageScannerActionResult>;
+export declare function runPackageScannerAction({ env, cwd, fetchImpl, fsModule, pathModule, requestTimeoutMs, }?: RunPackageScannerActionOptions): Promise<RunPackageScannerActionResult>;
 //# sourceMappingURL=run-package-scanner-action.d.ts.map

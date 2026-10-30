@@ -39,6 +39,9 @@ Current hardening measures in this repository include:
 - rejecting `working-directory`, `lockfile`, and `package-json` paths that
   escape the GitHub workspace
 - sending requests only to `https://www.package-scanner.dev`
+- accepting only `npm`, `pnpm`, `yarn`, and `bun` as `package-manager`
+- timing out analysis requests after 120 seconds
 - validating GitHub Actions output values before writing to `GITHUB_OUTPUT`
-- sanitizing API-derived values before writing to `GITHUB_STEP_SUMMARY`
+- sanitizing API-derived values before writing them to logs or
+  `GITHUB_STEP_SUMMARY`
 - avoiding raw upstream response bodies in default error messages
