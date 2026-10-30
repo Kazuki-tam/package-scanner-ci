@@ -7,7 +7,7 @@ export type { PathFsDeps, FsReadDeps } from "./support/fs-deps.js";
 export { LOCKFILE_CANDIDATES, LOCKFILE_DETECTION_ORDER, PackageManager, detectLockfile, inferManagerFromFilename, normalizePackageManager, } from "./domain/lockfile.js";
 export type { ResolveLockfileInputResult } from "./infrastructure/action-inputs.js";
 export { getTrimmedEnv, readFileIfExists, resolveLockfileInput, resolvePackageJsonInput, resolveWorkingDirectory, } from "./infrastructure/action-inputs.js";
-export type { CreateRequestBodyInput } from "./infrastructure/ci-api.js";
+export type { AnalyzeResponse, CreateRequestBodyInput } from "./infrastructure/ci-api.js";
 export { ANALYZE_REQUEST_TIMEOUT_MS, createRequestFailedMessage, DEFAULT_API_BASE_URL, createRequestBody, getApiUrl, parseJsonResponseText, postAnalyzeRequest, } from "./infrastructure/ci-api.js";
 export type { CiAnalyzeSuccessResponse, ParsedCiAnalyzeResult, VulnerabilitySeverity, VulnerabilitySeverityCounts, VulnerabilitySeverityThreshold, } from "./infrastructure/action-outputs.js";
 export { countVulnerabilitiesAtOrAboveSeverity, countVulnerabilitiesBySeverity, getVulnerabilitySeverity, normalizeVulnerabilitySeverityThreshold, parseCiAnalyzeSuccessResponse, VULNERABILITY_SEVERITY_ORDER, writeGitHubOutputs, writeGitHubStepSummary, } from "./infrastructure/action-outputs.js";

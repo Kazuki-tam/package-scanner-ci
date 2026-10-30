@@ -24,7 +24,7 @@ export {
   resolveWorkingDirectory,
 } from "./infrastructure/action-inputs.js";
 
-export type { CreateRequestBodyInput } from "./infrastructure/ci-api.js";
+export type { AnalyzeResponse, CreateRequestBodyInput } from "./infrastructure/ci-api.js";
 export {
   ANALYZE_REQUEST_TIMEOUT_MS,
   createRequestFailedMessage,

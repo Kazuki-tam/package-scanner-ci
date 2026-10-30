@@ -880,6 +880,31 @@ describe("package-scanner action helper", () => {
     ).rejects.toThrow(/request timed out after 5ms/);
   });
 
+  it("reports a timeout while reading the response body", async () => {
+    const workspace = "/workspace";
+    const fsModule = createFakeFs({
+      [path.join(workspace, "package.json")]: '{"name":"demo"}',
+    });
+    const timeoutError = new Error("The operation was aborted due to timeout");
+    timeoutError.name = "TimeoutError";
+    const stalledBody = new ReadableStream({
+      pull(controller) {
+        controller.error(timeoutError);
+      },
+    });
+
+    await expect(
+      runPackageScannerAction({
+        env: { GITHUB_WORKSPACE: workspace },
+        cwd: workspace,
+        requestTimeoutMs: 5,
+        fetchImpl: async () => new Response(stalledBody, { status: 200 }),
+        fsModule: asFsModule(fsModule),
+        pathModule: path,
+      }),
+    ).rejects.toThrow(/^PackageScanner: request timed out after 5ms\.$/);
+  });
+
   it("wraps network failures before a response is received", async () => {
     const workspace = "/workspace";
     const fsModule = createFakeFs({

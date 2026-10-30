@@ -141,7 +141,7 @@ Accept: application/json
 - `lockfileContent` または `packageJsonContent` のどちらか少なくとも 1 つが必要です
 - ロックファイルを送る場合、package manager が判明している必要があります。
   `package-manager` は大文字小文字を区別せず、`npm`、`pnpm`、`yarn`、`bun` のいずれかである必要があります。
-- Action は解析リクエストを 120 秒で中断します。
+- Action は解析リクエストを 120 秒で中断します。この時間にはレスポンス本文の読み取りも含まれます。
 - これとは別にサーバ側の検証が行われる可能性があります
 
 脆弱性の失敗しきい値:

@@ -69,13 +69,11 @@ export async function runPackageScannerAction({
     requestTimeoutMs,
   );
 
-  const responseText = await response.text();
-
   if (!response.ok) {
-    throw new Error(createRequestFailedMessage(response.status, responseText));
+    throw new Error(createRequestFailedMessage(response.status, response.text));
   }
 
-  const parsed = parseCiAnalyzeSuccessResponse(parseJsonResponseText(responseText));
+  const parsed = parseCiAnalyzeSuccessResponse(parseJsonResponseText(response.text));
   const failOnMalware = env.PACKAGE_SCANNER_FAIL_ON_MALWARE !== "false";
   const vulnerabilityThreshold = normalizeVulnerabilitySeverityThreshold(
     env.PACKAGE_SCANNER_FAIL_ON_VULNERABILITY_SEVERITY,

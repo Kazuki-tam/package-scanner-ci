@@ -157,7 +157,8 @@ Validation rules enforced by the Action before sending:
 - If a lockfile is sent, the package manager must be known.
   `package-manager` is matched case-insensitively and must be `npm`, `pnpm`,
   `yarn`, or `bun`.
-- The Action aborts the analysis request after 120 seconds.
+- The Action aborts the analysis request after 120 seconds, including time
+  spent reading the response body.
   Additional server-side validation may still apply.
 
 Vulnerability failure threshold:
