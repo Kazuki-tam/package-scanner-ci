@@ -194,13 +194,15 @@ pnpm run build
 
 ## メンテナ向け
 
-リリースタグを切る前に:
+リリースを公開する手順:
 
-1. `pnpm run check` を実行する
-2. `pnpm run build` を実行する
-3. 生成された `dist/` の差分を確認する
-4. 公開挙動が変わった場合は `CHANGELOG.md` を更新する
-5. `v1` のようなメジャータグを publish または移動する
+1. `package.json` の `version` を次のセマンティックバージョンに更新する
+2. `CHANGELOG.md` の `[Unreleased]` の内容を、そのバージョンの日付付きセクションへ移す
+3. `pnpm run check` を実行する
+4. `pnpm run build` を実行し、生成された `dist/` の差分を確認する
+5. リリース用の pull request をマージする
+6. マージコミットに注釈付きタグ `vX.Y.Z` を作成し、対応する `CHANGELOG.md` のセクションから GitHub リリースを公開する
+7. `v1` のようなメジャータグを同じコミットへ移動する
 
 追加のメンテナ向け文書:
 

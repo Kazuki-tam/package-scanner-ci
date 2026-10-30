@@ -42,10 +42,13 @@ Treat this file as the primary maintenance guide for the repository, and keep `C
 
 ## Release notes
 
+- Choose the next semantic version: patch for fixes and hardening, minor for new inputs or outputs, and a new major tag such as `v2` for breaking changes.
+- Set `version` in `package.json` to the release version in the release PR.
+- Move the `[Unreleased]` entries in `CHANGELOG.md` into a dated `[X.Y.Z] - YYYY-MM-DD` section and update the compare links at the bottom.
 - Before tagging a release, run `pnpm run check`.
 - Rebuild with `pnpm run build`.
-- Review the committed `dist/` diff.
-- Update `CHANGELOG.md` if the release changes public behavior.
+- Review the committed `dist/` diff; rebuilding on the release commit must leave `git status` clean.
+- After the release PR merges, create an annotated tag `vX.Y.Z` on the merge commit, then create the GitHub release from that tag using the matching `CHANGELOG.md` section.
 - Publish or move the major tag such as `v1` only after confirming the checked-in build output matches the release commit.
 
 ## Project-specific conventions

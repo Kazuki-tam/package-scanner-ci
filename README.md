@@ -207,13 +207,17 @@ Tooling used in this repository:
 
 ## Maintainers
 
-Before tagging a release:
+To publish a release:
 
-1. Run `pnpm run check`.
-2. Run `pnpm run build`.
-3. Review the generated `dist/` changes.
-4. Update `CHANGELOG.md` when the public behavior changed.
-5. Publish or move the major tag such as `v1`.
+1. Set `version` in `package.json` to the next semantic version.
+2. Move the `[Unreleased]` entries in `CHANGELOG.md` into a dated section for
+   that version.
+3. Run `pnpm run check`.
+4. Run `pnpm run build` and review the generated `dist/` changes.
+5. Merge the release pull request.
+6. Create an annotated `vX.Y.Z` tag on the merge commit and publish a GitHub
+   release from the matching `CHANGELOG.md` section.
+7. Move the major tag such as `v1` to the same commit.
 
 Additional maintainer guidance:
 
