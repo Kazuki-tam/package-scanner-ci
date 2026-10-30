@@ -1,5 +1,6 @@
 import type { PathFsDeps } from "../support/fs-deps.js";
 export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
+export declare function normalizePackageManager(value: string | undefined): PackageManager | undefined;
 /**
  * Single source of truth: lockfile basename → manager, and auto-detect order
  * (first existing file in this order wins).

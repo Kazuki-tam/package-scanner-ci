@@ -1,5 +1,21 @@
 import fs from "node:fs";
 import path from "node:path";
+const PACKAGE_MANAGERS = [
+    "npm",
+    "pnpm",
+    "yarn",
+    "bun",
+];
+export function normalizePackageManager(value) {
+    const normalized = (value ?? "").trim().toLowerCase();
+    if (!normalized) {
+        return undefined;
+    }
+    if (PACKAGE_MANAGERS.includes(normalized)) {
+        return normalized;
+    }
+    throw new Error("PackageScanner: package-manager must be npm, pnpm, yarn, or bun.");
+}
 /**
  * Single source of truth: lockfile basename → manager, and auto-detect order
  * (first existing file in this order wins).

@@ -284,7 +284,7 @@ from custom MCP tools:
 [rules]
 secrets = true
 pii = true
-internal_terms = true   # enable custom term matching
+internal_terms = true # enable custom term matching
 ```
 
 ## Prompt injection awareness

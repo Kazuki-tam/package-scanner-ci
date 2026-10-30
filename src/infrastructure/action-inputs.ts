@@ -1,7 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { detectLockfile, inferManagerFromFilename } from "../domain/lockfile.js";
+import {
+  detectLockfile,
+  inferManagerFromFilename,
+  normalizePackageManager,
+} from "../domain/lockfile.js";
 import type { PathFsDeps } from "../support/fs-deps.js";
 
 function defaultRealpathSync(filePath: fs.PathLike): string {
@@ -100,7 +104,9 @@ export function resolveLockfileInput(
   }: PathFsDeps = {},
 ): ResolveLockfileInputResult {
   const lockfileInput = getTrimmedEnv(env, "PACKAGE_SCANNER_LOCKFILE");
-  const managerInput = getTrimmedEnv(env, "PACKAGE_SCANNER_PACKAGE_MANAGER");
+  const managerInput = normalizePackageManager(
+    getTrimmedEnv(env, "PACKAGE_SCANNER_PACKAGE_MANAGER"),
+  );
   const detectedLockfile = lockfileInput ? null : detectLockfile(dir, { existsSync, pathModule });
   const relativePath = lockfileInput || detectedLockfile?.relativePath || "";
 

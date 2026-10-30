@@ -12,6 +12,7 @@ export {
   PackageManager,
   detectLockfile,
   inferManagerFromFilename,
+  normalizePackageManager,
 } from "./domain/lockfile.js";
 
 export type { ResolveLockfileInputResult } from "./infrastructure/action-inputs.js";
@@ -25,11 +26,13 @@ export {
 
 export type { CreateRequestBodyInput } from "./infrastructure/ci-api.js";
 export {
+  ANALYZE_REQUEST_TIMEOUT_MS,
   createRequestFailedMessage,
   DEFAULT_API_BASE_URL,
   createRequestBody,
   getApiUrl,
   parseJsonResponseText,
+  postAnalyzeRequest,
 } from "./infrastructure/ci-api.js";
 
 export type {
@@ -55,3 +58,4 @@ export type {
   RunPackageScannerActionResult,
 } from "./application/run-package-scanner-action.js";
 export { runPackageScannerAction } from "./application/run-package-scanner-action.js";
+export { formatAnalysisSuccessLog } from "./application/format-success-log.js";

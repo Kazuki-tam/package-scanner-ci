@@ -1,10 +1,24 @@
 import fs from "node:fs";
 
-export const VULNERABILITY_SEVERITY_ORDER = ["low", "moderate", "high", "critical"] as const;
+import {
+  countVulnerabilitiesBySeverity,
+  VULNERABILITY_SEVERITY_ORDER,
+  type VulnerabilitySeverityCounts,
+  type VulnerabilitySeverityThreshold,
+} from "../domain/vulnerability.js";
 
-export type VulnerabilitySeverity = (typeof VULNERABILITY_SEVERITY_ORDER)[number] | "unknown";
-export type VulnerabilitySeverityThreshold = (typeof VULNERABILITY_SEVERITY_ORDER)[number] | "off";
-export type VulnerabilitySeverityCounts = Record<VulnerabilitySeverity, number>;
+export {
+  countVulnerabilitiesAtOrAboveSeverity,
+  countVulnerabilitiesBySeverity,
+  getVulnerabilitySeverity,
+  normalizeVulnerabilitySeverityThreshold,
+  VULNERABILITY_SEVERITY_ORDER,
+} from "../domain/vulnerability.js";
+export type {
+  VulnerabilitySeverity,
+  VulnerabilitySeverityCounts,
+  VulnerabilitySeverityThreshold,
+} from "../domain/vulnerability.js";
 
 function toSafeGitHubOutputValue(name: string, value: string | number): string {
   const stringValue = String(value);
@@ -81,161 +95,32 @@ export interface ParsedCiAnalyzeResult {
   totalPackages: number | null;
 }
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : null;
+function asResponseRecord(value: unknown): Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error("PackageScanner: response JSON must be an object.");
+  }
+
+  return value as Record<string, unknown>;
 }
 
-function normalizeSeverityValue(value: string): VulnerabilitySeverity | null {
-  const normalized = value.trim().toLowerCase();
-
-  switch (normalized) {
-    case "unknown":
-      return "unknown";
-    case "low":
-      return "low";
-    case "medium":
-    case "moderate":
-      return "moderate";
-    case "high":
-      return "high";
-    case "critical":
-      return "critical";
-    default:
-      return null;
+function readArray(value: unknown, field: string): unknown[] {
+  if (value == null) {
+    return [];
   }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`PackageScanner: response field ${field} must be an array.`);
+  }
+
+  return value;
 }
 
-function normalizeCvssScore(score: unknown): VulnerabilitySeverity | null {
-  const numericScore =
-    typeof score === "number"
-      ? score
-      : typeof score === "string" && /^\d+(\.\d+)?$/.test(score.trim())
-        ? Number(score)
-        : Number.NaN;
-
-  if (!Number.isFinite(numericScore) || numericScore <= 0) {
-    return null;
+function readNonNegativeInteger(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+    return undefined;
   }
 
-  if (numericScore >= 9) {
-    return "critical";
-  }
-  if (numericScore >= 7) {
-    return "high";
-  }
-  if (numericScore >= 4) {
-    return "moderate";
-  }
-  return "low";
-}
-
-function getNestedSeverity(
-  record: Record<string, unknown>,
-  key: string,
-): VulnerabilitySeverity | null {
-  const nested = asRecord(record[key]);
-
-  if (!nested) {
-    return null;
-  }
-
-  return (
-    normalizeSeverityValue(String(nested.severity ?? "")) ??
-    normalizeCvssScore(nested.cvssScore) ??
-    normalizeCvssScore(asRecord(nested.cvss)?.score)
-  );
-}
-
-export function getVulnerabilitySeverity(vulnerability: unknown): VulnerabilitySeverity | null {
-  const record = asRecord(vulnerability);
-
-  if (!record) {
-    return null;
-  }
-
-  const directSeverity = record.severity;
-
-  if (typeof directSeverity === "string") {
-    return normalizeSeverityValue(directSeverity);
-  }
-
-  if (Array.isArray(directSeverity)) {
-    for (const entry of directSeverity) {
-      const severityEntry = asRecord(entry);
-      const normalized = normalizeCvssScore(severityEntry?.score);
-
-      if (normalized) {
-        return normalized;
-      }
-    }
-  }
-
-  return (
-    getNestedSeverity(record, "database_specific") ??
-    getNestedSeverity(record, "databaseSpecific") ??
-    getNestedSeverity(record, "advisory") ??
-    normalizeCvssScore(record.cvssScore) ??
-    normalizeCvssScore(asRecord(record.cvss)?.score)
-  );
-}
-
-export function normalizeVulnerabilitySeverityThreshold(
-  value: string | undefined,
-): VulnerabilitySeverityThreshold {
-  const normalized = (value || "high").trim().toLowerCase();
-
-  if (normalized === "off" || normalized === "false" || normalized === "none") {
-    return "off";
-  }
-
-  const severity = normalizeSeverityValue(normalized);
-
-  if (!severity || severity === "unknown") {
-    throw new Error(
-      "PackageScanner: invalid fail-on-vulnerability-severity. Use off, low, moderate, high, or critical.",
-    );
-  }
-
-  return severity;
-}
-
-export function countVulnerabilitiesAtOrAboveSeverity(
-  vulnerabilities: unknown[],
-  threshold: VulnerabilitySeverityThreshold,
-): number {
-  if (threshold === "off") {
-    return 0;
-  }
-
-  const counts = countVulnerabilitiesBySeverity(vulnerabilities);
-  const thresholdIndex = VULNERABILITY_SEVERITY_ORDER.indexOf(threshold);
-
-  return VULNERABILITY_SEVERITY_ORDER.slice(thresholdIndex).reduce(
-    (count, severity) => count + counts[severity],
-    0,
-  );
-}
-
-export function countVulnerabilitiesBySeverity(
-  vulnerabilities: unknown[],
-): VulnerabilitySeverityCounts {
-  const counts: VulnerabilitySeverityCounts = {
-    unknown: 0,
-    low: 0,
-    moderate: 0,
-    high: 0,
-    critical: 0,
-  };
-
-  for (const vulnerability of vulnerabilities) {
-    const severity = getVulnerabilitySeverity(vulnerability);
-
-    if (severity) {
-      counts[severity] += 1;
-    }
-  }
-
-  return counts;
+  return value;
 }
 
 export function writeGitHubStepSummary(
@@ -285,26 +170,35 @@ export function writeGitHubStepSummary(
   appendFileSync(summaryPath, `${lines.join("\n")}\n`);
 }
 
-export function parseCiAnalyzeSuccessResponse(
-  result: CiAnalyzeSuccessResponse,
-): ParsedCiAnalyzeResult {
-  const malware = result.malware ?? [];
-  const malwareCount = malware.length;
-  const vulnerabilities = result.vulnerabilities ?? [];
+export function parseCiAnalyzeSuccessResponse(result: unknown): ParsedCiAnalyzeResult {
+  const record = asResponseRecord(result);
+  const summary = asOptionalRecord(record.summary);
+  const malware = readArray(record.malware, "malware");
+  const vulnerabilities = readArray(record.vulnerabilities, "vulnerabilities");
   const vulnerabilitySeverityCounts = countVulnerabilitiesBySeverity(vulnerabilities);
   const vulnerabilityCount =
-    typeof result.summary?.vulnerabilityCount === "number"
-      ? result.summary.vulnerabilityCount
-      : vulnerabilities.length;
-  const analysisId = typeof result.analysisId === "string" ? result.analysisId : "";
+    readNonNegativeInteger(summary?.vulnerabilityCount) ?? vulnerabilities.length;
+  const analysisId = typeof record.analysisId === "string" ? record.analysisId : "";
 
   return {
     analysisId,
     malware,
-    malwareCount,
+    malwareCount: malware.length,
     vulnerabilities,
     vulnerabilityCount,
     vulnerabilitySeverityCounts,
-    totalPackages: result.summary?.total ?? null,
+    totalPackages: readNonNegativeInteger(summary?.total) ?? null,
   };
+}
+
+function asOptionalRecord(value: unknown): Record<string, unknown> | undefined {
+  if (value == null) {
+    return undefined;
+  }
+
+  if (typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("PackageScanner: response field summary must be an object.");
+  }
+
+  return value as Record<string, unknown>;
 }

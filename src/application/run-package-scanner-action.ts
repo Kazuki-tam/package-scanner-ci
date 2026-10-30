@@ -6,7 +6,6 @@ import {
   resolveLockfileInput,
   resolvePackageJsonInput,
   resolveWorkingDirectory,
-  type CiAnalyzeSuccessResponse,
   type ParsedCiAnalyzeResult,
   normalizeVulnerabilitySeverityThreshold,
   parseCiAnalyzeSuccessResponse,
@@ -16,6 +15,7 @@ import {
   createRequestBody,
   getApiUrl,
   parseJsonResponseText,
+  postAnalyzeRequest,
 } from "../infrastructure/index.js";
 
 export type RunPackageScannerActionResult = ParsedCiAnalyzeResult;
@@ -26,6 +26,7 @@ export interface RunPackageScannerActionOptions {
   fetchImpl?: typeof fetch;
   fsModule?: typeof fs;
   pathModule?: typeof path;
+  requestTimeoutMs?: number;
 }
 
 export async function runPackageScannerAction({
@@ -34,6 +35,7 @@ export async function runPackageScannerAction({
   fetchImpl = fetch,
   fsModule = fs,
   pathModule = path,
+  requestTimeoutMs,
 }: RunPackageScannerActionOptions = {}): Promise<RunPackageScannerActionResult> {
   const workingDirectory = resolveWorkingDirectory(env, cwd, pathModule);
 
@@ -60,11 +62,12 @@ export async function runPackageScannerAction({
     enableMetadataCheck: env.PACKAGE_SCANNER_ENABLE_METADATA_CHECK === "true",
   });
 
-  const response = await fetchImpl(getApiUrl(env), {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(requestBody),
-  });
+  const response = await postAnalyzeRequest(
+    fetchImpl,
+    getApiUrl(env),
+    requestBody,
+    requestTimeoutMs,
+  );
 
   const responseText = await response.text();
 
@@ -72,8 +75,7 @@ export async function runPackageScannerAction({
     throw new Error(createRequestFailedMessage(response.status, responseText));
   }
 
-  const result = parseJsonResponseText(responseText) as CiAnalyzeSuccessResponse;
-  const parsed = parseCiAnalyzeSuccessResponse(result);
+  const parsed = parseCiAnalyzeSuccessResponse(parseJsonResponseText(responseText));
   const failOnMalware = env.PACKAGE_SCANNER_FAIL_ON_MALWARE !== "false";
   const vulnerabilityThreshold = normalizeVulnerabilitySeverityThreshold(
     env.PACKAGE_SCANNER_FAIL_ON_VULNERABILITY_SEVERITY,

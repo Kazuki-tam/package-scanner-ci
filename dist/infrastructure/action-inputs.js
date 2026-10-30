@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { detectLockfile, inferManagerFromFilename } from "../domain/lockfile.js";
+import { detectLockfile, inferManagerFromFilename, normalizePackageManager, } from "../domain/lockfile.js";
 function defaultRealpathSync(filePath) {
     return typeof fs.realpathSync.native === "function"
         ? fs.realpathSync.native(filePath)
@@ -48,7 +48,7 @@ export function readFileIfExists(filePath, { existsSync = fs.existsSync, readFil
 }
 export function resolveLockfileInput(dir, env, { existsSync = fs.existsSync, readFileSync = fs.readFileSync, realpathSync = defaultRealpathSync, pathModule = path, } = {}) {
     const lockfileInput = getTrimmedEnv(env, "PACKAGE_SCANNER_LOCKFILE");
-    const managerInput = getTrimmedEnv(env, "PACKAGE_SCANNER_PACKAGE_MANAGER");
+    const managerInput = normalizePackageManager(getTrimmedEnv(env, "PACKAGE_SCANNER_PACKAGE_MANAGER"));
     const detectedLockfile = lockfileInput ? null : detectLockfile(dir, { existsSync, pathModule });
     const relativePath = lockfileInput || detectedLockfile?.relativePath || "";
     if (!relativePath) {

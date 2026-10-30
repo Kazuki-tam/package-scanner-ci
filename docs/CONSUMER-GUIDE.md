@@ -60,7 +60,9 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1
@@ -174,13 +176,20 @@ Example:
 
 ```yaml
 - name: Print scan summary
+  env:
+    ANALYSIS_ID: ${{ steps.scan.outputs.analysis-id }}
+    MALWARE_COUNT: ${{ steps.scan.outputs.malware-count }}
+    VULNERABILITY_COUNT: ${{ steps.scan.outputs.vulnerability-count }}
+    VULNERABILITY_UNKNOWN_COUNT: ${{ steps.scan.outputs.vulnerability-unknown-count }}
+    VULNERABILITY_HIGH_COUNT: ${{ steps.scan.outputs.vulnerability-high-count }}
+    VULNERABILITY_CRITICAL_COUNT: ${{ steps.scan.outputs.vulnerability-critical-count }}
   run: |
-    echo "analysis=${{ steps.scan.outputs.analysis-id }}"
-    echo "malware=${{ steps.scan.outputs.malware-count }}"
-    echo "vulns=${{ steps.scan.outputs.vulnerability-count }}"
-    echo "unknown=${{ steps.scan.outputs.vulnerability-unknown-count }}"
-    echo "high=${{ steps.scan.outputs.vulnerability-high-count }}"
-    echo "critical=${{ steps.scan.outputs.vulnerability-critical-count }}"
+    echo "analysis=${ANALYSIS_ID}"
+    echo "malware=${MALWARE_COUNT}"
+    echo "vulns=${VULNERABILITY_COUNT}"
+    echo "unknown=${VULNERABILITY_UNKNOWN_COUNT}"
+    echo "high=${VULNERABILITY_HIGH_COUNT}"
+    echo "critical=${VULNERABILITY_CRITICAL_COUNT}"
 ```
 
 The Action also writes a Markdown summary to the GitHub Actions job summary when
@@ -204,7 +213,9 @@ jobs:
   scan-web:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1
@@ -234,7 +245,9 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1

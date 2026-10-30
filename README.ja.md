@@ -28,20 +28,32 @@ jobs:
   package-scanner:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1
 
-      - run: |
-          echo "analysis=${{ steps.scan.outputs.analysis-id }}"
-          echo "malware=${{ steps.scan.outputs.malware-count }}"
-          echo "vulns=${{ steps.scan.outputs.vulnerability-count }}"
-          echo "unknown=${{ steps.scan.outputs.vulnerability-unknown-count }}"
-          echo "low=${{ steps.scan.outputs.vulnerability-low-count }}"
-          echo "moderate=${{ steps.scan.outputs.vulnerability-moderate-count }}"
-          echo "high=${{ steps.scan.outputs.vulnerability-high-count }}"
-          echo "critical=${{ steps.scan.outputs.vulnerability-critical-count }}"
+      - name: Print scan summary
+        env:
+          ANALYSIS_ID: ${{ steps.scan.outputs.analysis-id }}
+          MALWARE_COUNT: ${{ steps.scan.outputs.malware-count }}
+          VULNERABILITY_COUNT: ${{ steps.scan.outputs.vulnerability-count }}
+          VULNERABILITY_UNKNOWN_COUNT: ${{ steps.scan.outputs.vulnerability-unknown-count }}
+          VULNERABILITY_LOW_COUNT: ${{ steps.scan.outputs.vulnerability-low-count }}
+          VULNERABILITY_MODERATE_COUNT: ${{ steps.scan.outputs.vulnerability-moderate-count }}
+          VULNERABILITY_HIGH_COUNT: ${{ steps.scan.outputs.vulnerability-high-count }}
+          VULNERABILITY_CRITICAL_COUNT: ${{ steps.scan.outputs.vulnerability-critical-count }}
+        run: |
+          echo "analysis=${ANALYSIS_ID}"
+          echo "malware=${MALWARE_COUNT}"
+          echo "vulns=${VULNERABILITY_COUNT}"
+          echo "unknown=${VULNERABILITY_UNKNOWN_COUNT}"
+          echo "low=${VULNERABILITY_LOW_COUNT}"
+          echo "moderate=${VULNERABILITY_MODERATE_COUNT}"
+          echo "high=${VULNERABILITY_HIGH_COUNT}"
+          echo "critical=${VULNERABILITY_CRITICAL_COUNT}"
 ```
 
 より完全なワークフロー例は `examples/consumer-workflow.yml` にあります。
@@ -77,16 +89,23 @@ PR コメントに使う例:
 ```yaml
 - uses: actions/github-script@v7
   if: github.event_name == 'pull_request'
+  env:
+    MALWARE_COUNT: ${{ steps.scan.outputs.malware-count }}
+    VULNERABILITY_UNKNOWN_COUNT: ${{ steps.scan.outputs.vulnerability-unknown-count }}
+    VULNERABILITY_LOW_COUNT: ${{ steps.scan.outputs.vulnerability-low-count }}
+    VULNERABILITY_MODERATE_COUNT: ${{ steps.scan.outputs.vulnerability-moderate-count }}
+    VULNERABILITY_HIGH_COUNT: ${{ steps.scan.outputs.vulnerability-high-count }}
+    VULNERABILITY_CRITICAL_COUNT: ${{ steps.scan.outputs.vulnerability-critical-count }}
   with:
     script: |
       const body = [
         "## PackageScanner",
-        `- Malware: ${{ steps.scan.outputs.malware-count }}`,
-        `- Unknown: ${{ steps.scan.outputs.vulnerability-unknown-count }}`,
-        `- Low: ${{ steps.scan.outputs.vulnerability-low-count }}`,
-        `- Moderate: ${{ steps.scan.outputs.vulnerability-moderate-count }}`,
-        `- High: ${{ steps.scan.outputs.vulnerability-high-count }}`,
-        `- Critical: ${{ steps.scan.outputs.vulnerability-critical-count }}`,
+        `- Malware: ${process.env.MALWARE_COUNT}`,
+        `- Unknown: ${process.env.VULNERABILITY_UNKNOWN_COUNT}`,
+        `- Low: ${process.env.VULNERABILITY_LOW_COUNT}`,
+        `- Moderate: ${process.env.VULNERABILITY_MODERATE_COUNT}`,
+        `- High: ${process.env.VULNERABILITY_HIGH_COUNT}`,
+        `- Critical: ${process.env.VULNERABILITY_CRITICAL_COUNT}`,
       ].join("\n");
       await github.rest.issues.createComment({
         owner: context.repo.owner,
@@ -132,6 +151,7 @@ PR コメントに使う例:
 - self-hosted runner では `node` が `PATH` 上に存在する必要があります
 - ランタイムは組み込みの Fetch API に依存するため、Node `20.19+` を使用してください
 - `https://www.package-scanner.dev` への外向き HTTPS 通信を許可してください
+- ホスト版 API が 120 秒以内に応答しない場合、解析リクエストは失敗します
 
 ## 公開契約
 

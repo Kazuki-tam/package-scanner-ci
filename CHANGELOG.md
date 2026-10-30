@@ -29,13 +29,22 @@ versioning for its public GitHub Action behavior.
 - removed the public `api-base-url` input and now always send analysis requests
   to the hosted PackageScanner endpoint at `https://www.package-scanner.dev`
 - raised the minimum supported Node.js version to `20.19` and upgraded the
-  development toolchain to Vite `8.2.0`
+  development toolchain to patched Vite `8.3.5`, Vitest `4.1.12`, Oxlint, and
+  Oxfmt releases
+- validate `package-manager` case-insensitively and fail closed on unsupported
+  values
+- time out analysis requests after 120 seconds and reject success payloads that
+  are not JSON objects or do not use arrays for finding lists
 
 ### Security
 
 - reject any attempt to override the hosted API origin away from
   `https://www.package-scanner.dev`
 - sanitize API-derived values before writing them to `GITHUB_STEP_SUMMARY`
+- upgrade development dependencies that carried Vite, Vitest, nanoid,
+  source-map-js, and tinypool advisories
+- read Action outputs from environment variables in examples and consumer
+  docs, and disable credential persistence on those checkout steps
 
 ## [1.0.2]
 
