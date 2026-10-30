@@ -6,6 +6,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "pnpm-lock.yaml"
+      - "pnpm-lock.yml"
       - "yarn.lock"
       - "bun.lock"
   push:
@@ -20,10 +21,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - id: scan
         uses: Kazuki-tam/package-scanner-ci@v1
 
-      - run: |
-          echo "analysis=${{ steps.scan.outputs.analysis-id }}"
-          echo "malware=${{ steps.scan.outputs.malware-count }}"
+      - name: Print scan summary
+        env:
+          ANALYSIS_ID: ${{ steps.scan.outputs.analysis-id }}
+          MALWARE_COUNT: ${{ steps.scan.outputs.malware-count }}
+        run: |
+          echo "analysis=${ANALYSIS_ID}"
+          echo "malware=${MALWARE_COUNT}"

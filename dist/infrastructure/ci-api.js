@@ -62,14 +62,16 @@ export function getApiUrl(env) {
     }
     return `${DEFAULT_API_BASE_URL}/api/ci/analyze`;
 }
+/** The timeout covers both the response headers and the full response body. */
 export async function postAnalyzeRequest(fetchImpl, url, body, timeoutMs = ANALYZE_REQUEST_TIMEOUT_MS) {
     try {
-        return await fetchImpl(url, {
+        const response = await fetchImpl(url, {
             method: "POST",
             headers: { "Content-Type": "application/json", Accept: "application/json" },
             body: JSON.stringify(body),
             signal: AbortSignal.timeout(timeoutMs),
         });
+        return { ok: response.ok, status: response.status, text: await response.text() };
     }
     catch (error) {
         const requestError = toRequestError(error, timeoutMs);

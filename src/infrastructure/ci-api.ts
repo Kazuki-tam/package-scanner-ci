@@ -102,19 +102,28 @@ export function getApiUrl(env: NodeJS.ProcessEnv): string {
   return `${DEFAULT_API_BASE_URL}/api/ci/analyze`;
 }
 
+export interface AnalyzeResponse {
+  ok: boolean;
+  status: number;
+  text: string;
+}
+
+/** The timeout covers both the response headers and the full response body. */
 export async function postAnalyzeRequest(
   fetchImpl: typeof fetch,
   url: string,
   body: unknown,
   timeoutMs = ANALYZE_REQUEST_TIMEOUT_MS,
-): Promise<Response> {
+): Promise<AnalyzeResponse> {
   try {
-    return await fetchImpl(url, {
+    const response = await fetchImpl(url, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(timeoutMs),
     });
+
+    return { ok: response.ok, status: response.status, text: await response.text() };
   } catch (error) {
     const requestError = toRequestError(error, timeoutMs);
 

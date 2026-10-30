@@ -8,7 +8,13 @@ export interface CreateRequestBodyInput {
 }
 export declare function createRequestBody({ lockfileContent, manager, packageJsonContent, enableMetadataCheck, }: CreateRequestBodyInput): Record<string, unknown>;
 export declare function getApiUrl(env: NodeJS.ProcessEnv): string;
-export declare function postAnalyzeRequest(fetchImpl: typeof fetch, url: string, body: unknown, timeoutMs?: number): Promise<Response>;
+export interface AnalyzeResponse {
+    ok: boolean;
+    status: number;
+    text: string;
+}
+/** The timeout covers both the response headers and the full response body. */
+export declare function postAnalyzeRequest(fetchImpl: typeof fetch, url: string, body: unknown, timeoutMs?: number): Promise<AnalyzeResponse>;
 export declare function parseJsonResponseText(text: string): unknown;
 export declare function createRequestFailedMessage(status: number, responseText: string): string;
 //# sourceMappingURL=ci-api.d.ts.map

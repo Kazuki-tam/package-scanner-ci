@@ -33,8 +33,9 @@ versioning for its public GitHub Action behavior.
   Oxfmt releases
 - validate `package-manager` case-insensitively and fail closed on unsupported
   values
-- time out analysis requests after 120 seconds and reject success payloads that
-  are not JSON objects or do not use arrays for finding lists
+- time out analysis requests after 120 seconds, including time spent reading
+  the response body, and reject success payloads that are not JSON objects or
+  do not use arrays for finding lists
 
 ### Security
 
@@ -43,8 +44,9 @@ versioning for its public GitHub Action behavior.
 - sanitize API-derived values before writing them to `GITHUB_STEP_SUMMARY`
 - upgrade development dependencies that carried Vite, Vitest, nanoid,
   source-map-js, and tinypool advisories
-- read Action outputs from environment variables in examples and consumer
-  docs, and disable credential persistence on those checkout steps
+- read Action outputs from environment variables in this repository's
+  workflows, examples, and consumer docs, and disable credential persistence on
+  those checkout steps
 
 ## [1.0.2]
 
